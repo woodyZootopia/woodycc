@@ -18,5 +18,6 @@ try() {
 
 try 0 0
 try 42 42
+try '5+20-4' 21
 
 echo OK
