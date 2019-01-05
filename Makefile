@@ -1,3 +1,4 @@
+CFLAGS = -g
 woodycc: woodycc.c
 
 test: woodycc
