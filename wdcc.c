@@ -13,7 +13,7 @@ enum {
 
 typedef struct {
     int ty;      // token type
-    int val;     // if ty is TK_NUM, the value of it
+    int val;     // if ty is TK_NUM/TK_IDENT, the value of it
     char *input; // token character list for debugging
 } Token;
 
