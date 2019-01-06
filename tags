@@ -5,37 +5,36 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 CFLAGS	Makefile	/^CFLAGS = -g -std=c11 -Wall$/;"	m
-ND_IDENT	woodycc.c	/^    ND_IDENT,     \/\/ type of identifier node$/;"	e	enum:__anon3	file:
-ND_NUM	woodycc.c	/^    ND_NUM = 256, \/\/ type of integer node$/;"	e	enum:__anon3	file:
-Node	woodycc.c	/^typedef struct Node {$/;"	s	file:
-Node	woodycc.c	/^} Node;$/;"	t	typeref:struct:Node	file:
-TK_EOF	woodycc.c	/^    TK_EOF,       \/\/ token representing the end of input$/;"	e	enum:__anon1	file:
-TK_IDENT	woodycc.c	/^    TK_IDENT,     \/\/ variable token$/;"	e	enum:__anon1	file:
-TK_NUM	woodycc.c	/^    TK_NUM = 256, \/\/ integer token$/;"	e	enum:__anon1	file:
-Token	woodycc.c	/^} Token;$/;"	t	typeref:struct:__anon2	file:
-assign	woodycc.c	/^Node *assign() {$/;"	f
-assign_prime	woodycc.c	/^Node *assign_prime() {$/;"	f
-code	woodycc.c	/^Node *code[100]; \/\/ pointer to the top of nodes$/;"	v
-error	woodycc.c	/^void error(int i) {$/;"	f
-error2	woodycc.c	/^void error2(char error_message[], int i) {$/;"	f
-expr	woodycc.c	/^Node *expr() {$/;"	f
-gen	woodycc.c	/^void gen(Node *node) {$/;"	f
-input	woodycc.c	/^    char *input; \/\/ token character list for debugging$/;"	m	struct:__anon2	file:
-lhs	woodycc.c	/^    struct Node *lhs; \/\/ left-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
-main	tmp.s	/^main:$/;"	l
-main	woodycc.c	/^int main(int argc, char **argv) {$/;"	f
-mul	woodycc.c	/^Node *mul() {$/;"	f
-name	woodycc.c	/^    char name;        \/\/ for identifier$/;"	m	struct:Node	file:
-new_node	woodycc.c	/^Node *new_node(int ty, Node *lhs, Node *rhs) {$/;"	f
-new_node_num	woodycc.c	/^Node *new_node_num(int val) {$/;"	f
-pos	woodycc.c	/^int pos = 0;$/;"	v
-program	woodycc.c	/^void program() {$/;"	f
-rhs	woodycc.c	/^    struct Node *rhs; \/\/ right-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
-term	woodycc.c	/^Node *term() {$/;"	f
-tokenize	woodycc.c	/^void tokenize(char *p) {$/;"	f
-tokens	woodycc.c	/^Token tokens[100];$/;"	v
+ND_IDENT	wdcc.c	/^    ND_IDENT,     \/\/ type of identifier node$/;"	e	enum:__anon3	file:
+ND_NUM	wdcc.c	/^    ND_NUM = 256, \/\/ type of integer node$/;"	e	enum:__anon3	file:
+Node	wdcc.c	/^typedef struct Node {$/;"	s	file:
+Node	wdcc.c	/^} Node;$/;"	t	typeref:struct:Node	file:
+TK_EOF	wdcc.c	/^    TK_EOF,       \/\/ token representing the end of input$/;"	e	enum:__anon1	file:
+TK_IDENT	wdcc.c	/^    TK_IDENT,     \/\/ variable token$/;"	e	enum:__anon1	file:
+TK_NUM	wdcc.c	/^    TK_NUM = 256, \/\/ integer token$/;"	e	enum:__anon1	file:
+Token	wdcc.c	/^} Token;$/;"	t	typeref:struct:__anon2	file:
+add	wdcc.c	/^Node *add() {$/;"	f
+assign	wdcc.c	/^Node *assign() {$/;"	f
+code	wdcc.c	/^Node *code[100];$/;"	v
+error	wdcc.c	/^void error(int i) {$/;"	f
+error2	wdcc.c	/^void error2(char error_message[], int i) {$/;"	f
+gen	wdcc.c	/^void gen(Node *node) {$/;"	f
+gen_lval	wdcc.c	/^void gen_lval(Node *node) {$/;"	f
+input	wdcc.c	/^    char *input; \/\/ token character list for debugging$/;"	m	struct:__anon2	file:
+lhs	wdcc.c	/^    struct Node *lhs; \/\/ left-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
+main	wdcc.c	/^int main(int argc, char **argv) {$/;"	f
+mul	wdcc.c	/^Node *mul() {$/;"	f
+name	wdcc.c	/^    char name;        \/\/ for identifier$/;"	m	struct:Node	file:
+new_node	wdcc.c	/^Node *new_node(int ty, Node *lhs, Node *rhs) {$/;"	f
+new_node_num	wdcc.c	/^Node *new_node_num(int val) {$/;"	f
+pos	wdcc.c	/^int pos = 0;$/;"	v
+program	wdcc.c	/^void program() {$/;"	f
+rhs	wdcc.c	/^    struct Node *rhs; \/\/ right-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
+term	wdcc.c	/^Node *term() {$/;"	f
+tokenize	wdcc.c	/^void tokenize(char *p) {$/;"	f
+tokens	wdcc.c	/^Token tokens[100];$/;"	v
 try	test.sh	/^try() {$/;"	f
-ty	woodycc.c	/^    int ty;      \/\/ token type$/;"	m	struct:__anon2	file:
-ty	woodycc.c	/^    int ty; \/\/ must be set to some value; operator symbol itself or 256 for$/;"	m	struct:Node	file:
-val	woodycc.c	/^    int val;          \/\/ for number node$/;"	m	struct:Node	file:
-val	woodycc.c	/^    int val;     \/\/ if ty is TK_NUM, the value of it$/;"	m	struct:__anon2	file:
+ty	wdcc.c	/^    int ty;      \/\/ token type$/;"	m	struct:__anon2	file:
+ty	wdcc.c	/^    int ty; \/\/ must be set to some value; operator symbol itself or 256 for$/;"	m	struct:Node	file:
+val	wdcc.c	/^    int val;          \/\/ for number node$/;"	m	struct:Node	file:
+val	wdcc.c	/^    int val;     \/\/ if ty is TK_NUM\/TK_IDENT, the value of it$/;"	m	struct:__anon2	file:

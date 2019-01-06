@@ -74,13 +74,13 @@ void error2(char error_message[], int i) {
 int pos = 0;
 
 enum {
-    ND_NUM = 256, // type of integer node
+    ND_NUM = 256, // type of integer/identifier node
     ND_IDENT,     // type of identifier node
 };
 
 typedef struct Node {
-    int ty; // must be set to some value; operator symbol itself or 256 for
-            // number
+    int ty; // must be set to some value; operator symbol itself, ND_NUM=256 for
+            // number or ND_IDENT for identifier
     struct Node *lhs; // left-hand side
     struct Node *rhs; // right-hand side
     int val;          // for number node
@@ -100,6 +100,13 @@ Node *new_node(int ty, Node *lhs, Node *rhs) {
 Node *new_node_num(int val) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_NUM;
+    node->val = val;
+    return node;
+}
+
+Node *new_node_ident(int val) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_IDENT;
     node->val = val;
     return node;
 }
@@ -163,7 +170,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_IDENT)
-        return new_node_num(tokens[pos++].val);
+        return new_node_ident(tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = add();
@@ -177,11 +184,42 @@ Node *term() {
 
 /* ==================== code generation ==================== */
 
+void gen_lval(Node *node) {
+    if (node->ty != ND_IDENT) {
+        error2("left hand side is not a variable",0);
+    }
+
+    int offset = ('z' - node->name + 1) * 8;
+    printf("    mov rax, rbp\n");
+    printf("    sub rax, %d\n", offset);
+    printf("    push rax\n");
+}
+
 void gen(Node *node) {
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
         return;
     }
+
+    if (node->ty == ND_IDENT) {
+        gen_lval(node);
+        printf("    pop rax\n");
+        printf("    mov rax, [rax]\n");
+        printf("    push rax\n");
+        return;
+    }
+
+    if (node->ty == '=') {
+        gen_lval(node->lhs);
+        gen(node->rhs);
+
+        printf("    pop rdi\n");
+        printf("    pop rax\n");
+        printf("    mov [rax], rdi\n");
+        printf("    push rdi\n");
+    }
+
+    // If none of the above, the node is polynomial
 
     gen(node->lhs);
     gen(node->rhs);
@@ -220,11 +258,21 @@ int main(int argc, char **argv) {
 
     tokenize(argv[1]);
     program();
+
+    // prologue
+    printf("    push rbp\n");     // base pointer stacked
+    printf("    mov rbp, rsp\n"); // rsp is new base pointer
+    printf("    sub rsp, 208\n"); // 208=26*8 bytes allocated
+
     for (int i = 0; code[i] != NULL; i++) {
         gen(code[i]);
         printf("    pop rax\n");
     }
 
-    printf("    ret\n");
+    // epilogue
+    printf("  mov rsp, rbp\n"); // freeing the local variables
+    printf("  pop rbp\n");      // base pointer is back
+
+    printf("    ret\n"); // return rax
     return 0;
 }

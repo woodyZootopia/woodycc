@@ -5,13 +5,17 @@ try() {
 
     ./wdcc "$input" > tmp.s
     gcc -o tmp tmp.s
+    if [ $? == 1 ]; then
+        echo "ERROR: object file created, but compile error"
+        exit 1
+    fi
     ./tmp
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
         echo "$input => $actual"
     else
-        echo "expected $expected, but got $actual"
+        echo "ERROR: \"$input\" expected $expected, but got $actual"
         exit 1
     fi
 }
@@ -30,5 +34,6 @@ try "(3+5)/2" 4
 try "42;3" 3
 
 try "a+b;a=15;3" 3
+try "a=15;b=3;a=a+b;a" 18
 
 echo OK
