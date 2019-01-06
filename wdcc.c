@@ -7,6 +7,7 @@
 
 enum {
     TK_NUM = 256, // integer token
+    TK_IDENT,     // variable token
     TK_EOF,       // token representing the end of input
 };
 
@@ -27,7 +28,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/()", *p)) {
+        if (strchr("+-*/();", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -39,6 +40,14 @@ void tokenize(char *p) {
             tokens[i].ty = TK_NUM;
             tokens[i].val = strtol(p, &p, 10);
             i++;
+            continue;
+        }
+
+        if (*p >= 'a' && *p <= 'z') {
+            tokens[i].ty = TK_IDENT;
+            tokens[i].input = p;
+            i++;
+            p++;
             continue;
         }
 
@@ -66,14 +75,19 @@ int pos = 0;
 
 enum {
     ND_NUM = 256, // type of integer node
+    ND_IDENT,     // type of identifier node
 };
 
 typedef struct Node {
-    int ty;           // operator symbol or 256 for number
+    int ty; // must be set to some value; operator symbol itself or 256 for
+            // number
     struct Node *lhs; // left-hand side
     struct Node *rhs; // right-hand side
     int val;          // for number node
+    char name;        // for identifier
 } Node;
+
+Node *code[100];
 
 Node *new_node(int ty, Node *lhs, Node *rhs) {
     Node *node = malloc(sizeof(Node));
@@ -90,8 +104,44 @@ Node *new_node_num(int val) {
     return node;
 }
 
+// prototype declaration
+Node *assign();
+Node *assign_prime();
+Node *expr();
 Node *mul();
 Node *term();
+
+void program() {
+    int i = 0;
+    while (tokens[pos].ty != TK_EOF) {
+        code[i + 1] = NULL;
+        code[i++] = assign();
+    }
+}
+
+Node *assign() {
+    Node *lhs = expr();
+    if (tokens[pos].ty == ';') {
+        pos++;
+        return lhs;
+    } else {
+        return lhs;
+    }
+}
+
+Node *assign_prime() {
+    if (tokens[pos].ty == '=') {
+        pos++;
+        Node *lhs = expr();
+        Node *rhs = assign_prime();
+        if (rhs != NULL)
+            return new_node('=', lhs, rhs);
+        else {
+            return lhs;
+        }
+    }
+    return NULL;
+}
 
 Node *expr() {
     Node *lhs = mul();
@@ -121,6 +171,8 @@ Node *mul() {
 
 Node *term() {
     if (tokens[pos].ty == TK_NUM)
+        return new_node_num(tokens[pos++].val);
+    if (tokens[pos].ty == TK_IDENT)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
@@ -177,10 +229,12 @@ int main(int argc, char **argv) {
     printf("main:\n");
 
     tokenize(argv[1]);
-    Node *node = expr();
-    gen(node);
+    program();
+    for (int i = 0; code[i] != NULL; i++) {
+        gen(code[i]);
+        printf("    pop rax\n");
+    }
 
-    printf("    pop rax\n");
     printf("    ret\n");
     return 0;
 }

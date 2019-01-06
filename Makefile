@@ -1,8 +1,8 @@
 CFLAGS = -g -std=c11 -Wall
-woodycc: woodycc.c
+wdcc: wdcc.c
 
-test: woodycc
+test: wdcc
 	./test.sh
 
 clean:
-	rm -f woodycc *.o *~ tmp* *.out
+	rm -f wdcc *.o *~ tmp* *.out
