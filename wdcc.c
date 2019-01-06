@@ -175,7 +175,7 @@ Node *term() {
     error2("The token is uninterpretable:%s", pos);
 }
 
-/* ==================== virtual stack machine ==================== */
+/* ==================== code generation ==================== */
 
 void gen(Node *node) {
     if (node->ty == ND_NUM) {
