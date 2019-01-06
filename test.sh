@@ -29,6 +29,6 @@ try "(3+5)/2" 4
 
 try "42;3" 3
 
-try "a+b;3" 3
+try "a+b;a=15;3" 3
 
 echo OK

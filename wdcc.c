@@ -28,7 +28,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/();", *p)) {
+        if (strchr("+-*/();=", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -107,7 +107,7 @@ Node *new_node_num(int val) {
 // prototype declaration
 Node *assign();
 Node *assign_prime();
-Node *expr();
+Node *add();
 Node *mul();
 Node *term();
 
@@ -120,38 +120,28 @@ void program() {
 }
 
 Node *assign() {
-    Node *lhs = expr();
+    Node *lhs = add();
     if (tokens[pos].ty == ';') {
         pos++;
         return lhs;
-    } else {
-        return lhs;
     }
-}
-
-Node *assign_prime() {
     if (tokens[pos].ty == '=') {
         pos++;
-        Node *lhs = expr();
-        Node *rhs = assign_prime();
-        if (rhs != NULL)
-            return new_node('=', lhs, rhs);
-        else {
-            return lhs;
-        }
+        Node *rhs = assign();
+        return (new_node('=', lhs, rhs));
     }
-    return NULL;
+    return lhs;
 }
 
-Node *expr() {
+Node *add() {
     Node *lhs = mul();
     if (tokens[pos].ty == '+') {
         pos++;
-        return new_node('+', lhs, expr());
+        return new_node('+', lhs, add());
     }
     if (tokens[pos].ty == '-') {
         pos++;
-        return new_node('-', lhs, expr());
+        return new_node('-', lhs, add());
     }
     return lhs;
 }
@@ -176,13 +166,13 @@ Node *term() {
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
-        Node *node = expr();
+        Node *node = add();
         if (tokens[pos].ty != ')')
             error2("No closing bracket corresponding to the opening:%s", pos);
         pos++;
         return node;
     }
-    error2("The token is neither value or opening bracket:%s", pos);
+    error2("The token is uninterpretable:%s", pos);
 }
 
 /* ==================== virtual stack machine ==================== */
