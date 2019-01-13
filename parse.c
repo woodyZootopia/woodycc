@@ -114,6 +114,15 @@ void program() {
 }
 
 Node *paragraph() {
+    if (tokens[pos].ty == TK_IF) {
+        pos++;
+        if (tokens[pos].ty != '(') {
+            error2("if condition not stated", pos);
+        }
+        Node *lhs = assign();
+        Node *rhs = paragraph();
+        return new_node(ND_IF, lhs, rhs);
+    }
     if (tokens[pos].ty == '{') {
         pos++;
         Node *lhs = assign();
@@ -144,6 +153,16 @@ Node *assign() {
         pos++;
         Node *rhs = assign();
         return new_node('=', lhs, rhs);
+    }
+    if (tokens[pos].ty == TK_E) {
+        pos++;
+        Node *rhs = add();
+        return new_node(ND_E, lhs, rhs);
+    }
+    if (tokens[pos].ty == TK_NE) {
+        pos++;
+        Node *rhs = add();
+        return new_node(ND_NE, lhs, rhs);
     }
     return lhs;
 }
@@ -181,7 +200,7 @@ Node *term() {
         return new_node_ident((char)tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
-        Node *node = add();
+        Node *node = assign();
         if (tokens[pos].ty != ')')
             error2("No closing bracket corresponding to the opening:%s", pos);
         pos++;

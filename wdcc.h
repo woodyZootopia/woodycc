@@ -9,9 +9,9 @@ enum {
     TK_NUM = 256, // integer token
     TK_IDENT,     // variable token
     TK_EOF,       // token representing the end of input
+    TK_IF,
     TK_E,
     TK_NE,
-    TK_IF,
 };
 
 typedef struct {
@@ -26,6 +26,9 @@ extern Token tokens[100];
 enum {
     ND_NUM = 256, // type of integer/identifier node
     ND_IDENT,     // type of identifier node
+    ND_IF,
+    ND_E,
+    ND_NE,
 };
 
 typedef struct Node {

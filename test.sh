@@ -39,4 +39,7 @@ try "a=15;b=3;a=a+b;a" 18
 
 try "{a=3;b=a+3;}b;" 6
 
+try "a=2;b=2;if(a==b)b=3;b;" 3
+try "a=2;b=2;if(a!=b)b=3;b;" 2
+
 echo OK
