@@ -8,7 +8,11 @@ wdcc: $(OBJS)
 $(OBJS): wdcc.h
 
 test: wdcc
+	./wdcc -test
 	./test.sh
+
+format:
+	clang-format -i $(SRCS)
 
 clean:
 	rm -f wdcc *.o *~ tmp* *.out

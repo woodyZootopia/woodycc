@@ -5,6 +5,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (!strcmp(argv[1],"-test")) {
+        runtest();
+        return 0;
+    }
+
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");
@@ -13,8 +18,8 @@ int main(int argc, char **argv) {
     program();
 
     // prologue
-    printf("    push rbp\n");     // base pointer stacked
-    printf("    mov rbp, rsp\n"); // rsp is new base pointer
+    printf("    push rbp\n");       // base pointer stacked
+    printf("    mov rbp, rsp\n");   // rsp is new base pointer
     printf("    sub rsp, 208\n\n"); // 208=26*8 bytes allocated
 
     for (int i = 0; code[i] != NULL; i++) {
@@ -29,4 +34,3 @@ int main(int argc, char **argv) {
     printf("    ret\n"); // return rax
     return 0;
 }
-

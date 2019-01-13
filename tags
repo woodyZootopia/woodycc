@@ -4,37 +4,56 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-CFLAGS	Makefile	/^CFLAGS = -g -std=c11 -Wall$/;"	m
-ND_IDENT	wdcc.c	/^    ND_IDENT,     \/\/ type of identifier node$/;"	e	enum:__anon3	file:
-ND_NUM	wdcc.c	/^    ND_NUM = 256, \/\/ type of integer node$/;"	e	enum:__anon3	file:
-Node	wdcc.c	/^typedef struct Node {$/;"	s	file:
-Node	wdcc.c	/^} Node;$/;"	t	typeref:struct:Node	file:
-TK_EOF	wdcc.c	/^    TK_EOF,       \/\/ token representing the end of input$/;"	e	enum:__anon1	file:
-TK_IDENT	wdcc.c	/^    TK_IDENT,     \/\/ variable token$/;"	e	enum:__anon1	file:
-TK_NUM	wdcc.c	/^    TK_NUM = 256, \/\/ integer token$/;"	e	enum:__anon1	file:
-Token	wdcc.c	/^} Token;$/;"	t	typeref:struct:__anon2	file:
-add	wdcc.c	/^Node *add() {$/;"	f
-assign	wdcc.c	/^Node *assign() {$/;"	f
-code	wdcc.c	/^Node *code[100];$/;"	v
-error	wdcc.c	/^void error(int i) {$/;"	f
-error2	wdcc.c	/^void error2(char error_message[], int i) {$/;"	f
-gen	wdcc.c	/^void gen(Node *node) {$/;"	f
-gen_lval	wdcc.c	/^void gen_lval(Node *node) {$/;"	f
-input	wdcc.c	/^    char *input; \/\/ token character list for debugging$/;"	m	struct:__anon2	file:
-lhs	wdcc.c	/^    struct Node *lhs; \/\/ left-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
-main	wdcc.c	/^int main(int argc, char **argv) {$/;"	f
-mul	wdcc.c	/^Node *mul() {$/;"	f
-name	wdcc.c	/^    char name;        \/\/ for identifier$/;"	m	struct:Node	file:
-new_node	wdcc.c	/^Node *new_node(int ty, Node *lhs, Node *rhs) {$/;"	f
-new_node_num	wdcc.c	/^Node *new_node_num(int val) {$/;"	f
-pos	wdcc.c	/^int pos = 0;$/;"	v
-program	wdcc.c	/^void program() {$/;"	f
-rhs	wdcc.c	/^    struct Node *rhs; \/\/ right-hand side$/;"	m	struct:Node	typeref:struct:Node::Node	file:
-term	wdcc.c	/^Node *term() {$/;"	f
-tokenize	wdcc.c	/^void tokenize(char *p) {$/;"	f
-tokens	wdcc.c	/^Token tokens[100];$/;"	v
+CFLAGS	Makefile	/^CFLAGS=-std=c11 -Wall$/;"	m
+Map	wdcc.h	/^} Map;$/;"	t	typeref:struct:__anon5
+ND_IDENT	wdcc.h	/^    ND_IDENT,     \/\/ type of identifier node$/;"	e	enum:__anon3
+ND_NUM	wdcc.h	/^    ND_NUM = 256, \/\/ type of integer\/identifier node$/;"	e	enum:__anon3
+Node	wdcc.h	/^typedef struct Node {$/;"	s
+Node	wdcc.h	/^} Node;$/;"	t	typeref:struct:Node
+OBJS	Makefile	/^OBJS=$(SRCS:.c=.o)$/;"	m
+SRCS	Makefile	/^SRCS=$(wildcard *.c)$/;"	m
+TK_EOF	wdcc.h	/^    TK_EOF,       \/\/ token representing the end of input$/;"	e	enum:__anon1
+TK_IDENT	wdcc.h	/^    TK_IDENT,     \/\/ variable token$/;"	e	enum:__anon1
+TK_NUM	wdcc.h	/^    TK_NUM = 256, \/\/ integer token$/;"	e	enum:__anon1
+Token	wdcc.h	/^} Token;$/;"	t	typeref:struct:__anon2
+Vector	wdcc.h	/^} Vector;$/;"	t	typeref:struct:__anon4
+add	parse.c	/^Node *add() {$/;"	f
+assign	parse.c	/^Node *assign() {$/;"	f
+capacity	wdcc.h	/^    int capacity;$/;"	m	struct:__anon4
+code	parse.c	/^Node *code[100];$/;"	v
+data	wdcc.h	/^    void **data;$/;"	m	struct:__anon4
+error	parse.c	/^void error(int i) {$/;"	f
+error2	parse.c	/^void error2(char error_message[], int i) {$/;"	f
+expect	unit_test.c	/^int expect(int line, int expected, int actual) {$/;"	f
+gen	codegen.c	/^void gen(Node *node) {$/;"	f
+gen_lval	codegen.c	/^void gen_lval(Node *node) {$/;"	f
+input	wdcc.h	/^    char *input; \/\/ token character list for debugging$/;"	m	struct:__anon2
+keys	wdcc.h	/^    Vector *keys;$/;"	m	struct:__anon5
+len	wdcc.h	/^    int len;$/;"	m	struct:__anon4
+lhs	wdcc.h	/^    struct Node *lhs; \/\/ left-hand side$/;"	m	struct:Node	typeref:struct:Node::Node
+main	main.c	/^int main(int argc, char **argv) {$/;"	f
+map_get	util.c	/^void *map_get(Map *map, char *key) {$/;"	f
+map_put	util.c	/^void map_put(Map *map, char *key, void *val) {$/;"	f
+mul	parse.c	/^Node *mul() {$/;"	f
+name	wdcc.h	/^    char name;        \/\/ for identifier$/;"	m	struct:Node
+new_map	util.c	/^Map *new_map() {$/;"	f
+new_node	parse.c	/^Node *new_node(int ty, Node *lhs, Node *rhs) {$/;"	f
+new_node_ident	parse.c	/^Node *new_node_ident(char name) {$/;"	f
+new_node_num	parse.c	/^Node *new_node_num(int val) {$/;"	f
+new_vector	util.c	/^Vector *new_vector() {$/;"	f
+pos	parse.c	/^int pos = 0;$/;"	v
+program	parse.c	/^void program() {$/;"	f
+rhs	wdcc.h	/^    struct Node *rhs; \/\/ right-hand side$/;"	m	struct:Node	typeref:struct:Node::Node
+runtest	unit_test.c	/^void runtest() {$/;"	f
+term	parse.c	/^Node *term() {$/;"	f
+test_map	unit_test.c	/^void test_map() {$/;"	f
+test_vector	unit_test.c	/^void test_vector() {$/;"	f
+tokenize	parse.c	/^void tokenize(char *p) {$/;"	f
+tokens	parse.c	/^Token tokens[100];$/;"	v
 try	test.sh	/^try() {$/;"	f
-ty	wdcc.c	/^    int ty;      \/\/ token type$/;"	m	struct:__anon2	file:
-ty	wdcc.c	/^    int ty; \/\/ must be set to some value; operator symbol itself or 256 for$/;"	m	struct:Node	file:
-val	wdcc.c	/^    int val;          \/\/ for number node$/;"	m	struct:Node	file:
-val	wdcc.c	/^    int val;     \/\/ if ty is TK_NUM\/TK_IDENT, the value of it$/;"	m	struct:__anon2	file:
+ty	wdcc.h	/^    int ty;      \/\/ token type$/;"	m	struct:__anon2
+ty	wdcc.h	/^    int ty; \/\/ must be set to some value; operator symbol itself, ND_NUM=256 for$/;"	m	struct:Node
+val	wdcc.h	/^    int val;          \/\/ for number node$/;"	m	struct:Node
+val	wdcc.h	/^    int val;     \/\/ if ty is TK_NUM\/TK_IDENT, the value of it$/;"	m	struct:__anon2
+vals	wdcc.h	/^    Vector *vals;$/;"	m	struct:__anon5
+vec_push	util.c	/^void vec_push(Vector *vec, void *elem) {$/;"	f

@@ -36,6 +36,17 @@ typedef struct Node {
 
 extern Node *code[100];
 
+typedef struct {
+    void **data;
+    int capacity;
+    int len;
+} Vector;
+
+typedef struct {
+    Vector *keys;
+    Vector *vals;
+} Map;
+
 // prototype declaration
 Node *assign();
 Node *assign_prime();
@@ -47,3 +58,9 @@ void gen(Node *node);
 void error(int i);
 void error2(char error_message[], int i);
 void tokenize(char *p);
+void runtest();
+Vector *new_vector();
+void vec_push(Vector *vec, void *elem);
+Map *new_map();
+void map_put(Map *map, char *key, void *val);
+void *map_get(Map *map, char *key);
