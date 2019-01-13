@@ -46,6 +46,7 @@ void tokenize(char *p) {
         if (*p >= 'a' && *p <= 'z') {
             tokens[i].ty = TK_IDENT;
             tokens[i].input = p;
+            tokens[i].val = (int)*p;
             i++;
             p++;
             continue;
@@ -104,10 +105,10 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_ident(int val) {
+Node *new_node_ident(char name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_IDENT;
-    node->val = val;
+    node->name = name;
     return node;
 }
 
@@ -170,7 +171,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_IDENT)
-        return new_node_ident(tokens[pos++].val);
+        return new_node_ident((char)tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = add();
@@ -186,13 +187,13 @@ Node *term() {
 
 void gen_lval(Node *node) {
     if (node->ty != ND_IDENT) {
-        error2("left hand side is not a variable",0);
+        error2("left hand side is not a variable", 0);
     }
 
     int offset = ('z' - node->name + 1) * 8;
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
-    printf("    push rax\n");
+    printf("    push rax\n"); // rax is pointer to the variable
 }
 
 void gen(Node *node) {
@@ -248,7 +249,6 @@ void gen(Node *node) {
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        fprintf(stderr, "incorrect number of arguments.\n");
         return 1;
     }
 
@@ -262,16 +262,16 @@ int main(int argc, char **argv) {
     // prologue
     printf("    push rbp\n");     // base pointer stacked
     printf("    mov rbp, rsp\n"); // rsp is new base pointer
-    printf("    sub rsp, 208\n"); // 208=26*8 bytes allocated
+    printf("    sub rsp, 208\n\n"); // 208=26*8 bytes allocated
 
     for (int i = 0; code[i] != NULL; i++) {
         gen(code[i]);
-        printf("    pop rax\n");
+        printf("    pop rax\n\n");
     }
 
     // epilogue
-    printf("  mov rsp, rbp\n"); // freeing the local variables
-    printf("  pop rbp\n");      // base pointer is back
+    printf("    mov rsp, rbp\n"); // freeing the local variables
+    printf("    pop rbp\n");      // base pointer is back
 
     printf("    ret\n"); // return rax
     return 0;
