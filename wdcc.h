@@ -11,6 +11,7 @@ enum {
     TK_EOF,       // token representing the end of input
     TK_E,
     TK_NE,
+    TK_IF,
 };
 
 typedef struct {

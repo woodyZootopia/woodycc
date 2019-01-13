@@ -21,30 +21,42 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/();={}!", *p)) {
-            if(*(p+1)=='='){
-                if (*p == '!')
-                    tokens[i].ty= TK_NE;
-                else if(*p == '=')
-                    tokens[i].ty= TK_E;
-                tokens[i].input = p;
-                i++;
-                p+=2;
-                continue;
-            }
-            else{
-                tokens[i].ty = *p;
-                tokens[i].input = p;
-                i++;
-                p++;
-                continue;
-            }
+        if (!strncmp("!=", p, 2)) {
+            tokens[i].ty = TK_NE;
+            tokens[i].input = p;
+            i++;
+            p += 2;
+            continue;
+        }
+
+        if (!strncmp("==", p, 2)) {
+            tokens[i].ty = TK_E;
+            tokens[i].input = p;
+            i++;
+            p += 2;
+            continue;
+        }
+
+        if (strchr("+-*/();={}", *p)) {
+            tokens[i].ty = *p;
+            tokens[i].input = p;
+            i++;
+            p++;
+            continue;
         }
 
         if (isdigit(*p)) {
             tokens[i].ty = TK_NUM;
             tokens[i].val = strtol(p, &p, 10);
             i++;
+            continue;
+        }
+
+        if (!strncmp("if", p, 2)) {
+            tokens[i].ty = TK_IF;
+            tokens[i].input = p;
+            i++;
+            p += 2;
             continue;
         }
 
