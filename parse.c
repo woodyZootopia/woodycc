@@ -21,7 +21,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/();=", *p)) {
+        if (strchr("+-*/();={}", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -85,8 +85,29 @@ void program() {
     int i = 0;
     while (tokens[pos].ty != TK_EOF) {
         code[i + 1] = NULL;
-        code[i++] = assign();
+        code[i++] = paragraph();
     }
+}
+
+Node *paragraph() {
+    if (tokens[pos].ty == '{') {
+        pos++;
+        Node *lhs = assign();
+        Node *rhs = paragraph_prime();
+        return new_node('{', lhs, rhs);
+    }
+    Node *lhs = assign();
+    return lhs;
+}
+
+Node *paragraph_prime() {
+    Node *lhs = assign();
+    if (tokens[pos].ty == '}') {
+        pos++;
+        return lhs;
+    }
+    Node *rhs = paragraph_prime();
+    return new_node('{', lhs, rhs);
 }
 
 Node *assign() {
@@ -98,7 +119,7 @@ Node *assign() {
     if (tokens[pos].ty == '=') {
         pos++;
         Node *rhs = assign();
-        return (new_node('=', lhs, rhs));
+        return new_node('=', lhs, rhs);
     }
     return lhs;
 }

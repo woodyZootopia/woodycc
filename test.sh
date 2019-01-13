@@ -37,4 +37,6 @@ try "a+b;a=15;3" 3
 try "a+b;a=15;a" 15
 try "a=15;b=3;a=a+b;a" 18
 
+try "{a=3;b=a+3;}b;" 6
+
 echo OK

@@ -48,19 +48,24 @@ typedef struct {
 } Map;
 
 // prototype declaration
+void tokenize(char *p);
+
 Node *assign();
 Node *assign_prime();
 Node *add();
 Node *mul();
 Node *term();
 void program();
+Node *paragraph();
+Node *paragraph_prime();
+
 void gen(Node *node);
 void error(int i);
 void error2(char error_message[], int i);
-void tokenize(char *p);
-void runtest();
+
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
 Map *new_map();
 void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
+void runtest();
