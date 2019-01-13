@@ -1,5 +1,11 @@
-CFLAGS = -g -std=c11 -Wall
-wdcc: wdcc.c
+CFLAGS=-std=c11 -Wall
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
+
+wdcc: $(OBJS)
+	$(CC) -o wdcc $(OBJS) $(LDFLAGS)
+
+$(OBJS): wdcc.h
 
 test: wdcc
 	./test.sh
