@@ -9,6 +9,8 @@ enum {
     TK_NUM = 256, // integer token
     TK_IDENT,     // variable token
     TK_EOF,       // token representing the end of input
+    TK_E,
+    TK_NE,
 };
 
 typedef struct {
