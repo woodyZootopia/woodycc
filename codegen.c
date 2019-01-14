@@ -35,6 +35,27 @@ void gen(Node *node) {
         printf("    push rdi\n");
     }
 
+    if (node->ty == ND_IF){
+        gen(node->lhs->lhs);
+        gen(node->lhs->rhs);
+        printf("    pop rax\n");
+        printf("    pop rdi\n");
+        printf("    cmp rdi, rax\n");
+        if(node->lhs->ty == ND_E) {
+            printf("    jne .L2\n");
+        }
+        else if(node->lhs->ty == ND_NE) {
+            printf("    je .L2\n");
+        }
+        else {
+            error2("either == or != should be used for condition", 0);
+        }
+        gen(node->rhs);
+        printf("    pop rax\n");
+        printf(".L2:\n");
+        return;
+    }
+
     // If none of the above, the node is polynomial
 
     gen(node->lhs);
@@ -56,6 +77,7 @@ void gen(Node *node) {
     case '/':
         printf("    mov rdx, 0\n");
         printf("    div rdi\n");
+        break;
     }
     printf("    push rax\n");
 }
