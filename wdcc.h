@@ -12,12 +12,14 @@ enum {
     TK_IF,
     TK_E,
     TK_NE,
+    TK_FUNC,
 };
 
 typedef struct {
-    int ty;      // token type
-    int val;     // if ty is TK_NUM/TK_IDENT, the value of it
-    char *input; // token character list for debugging
+    int ty;              // token type
+    int val;             // if ty is TK_NUM/TK_IDENT, the value of it
+    char *input;         // token character list for debugging
+    char func_name[100]; // name of function
 } Token;
 
 extern Token tokens[100];
@@ -29,15 +31,17 @@ enum {
     ND_IF,
     ND_E,
     ND_NE,
+    ND_FUNC,
 };
 
 typedef struct Node {
     int ty; // must be set to some value; operator symbol itself, ND_NUM=256 for
             // number or ND_IDENT for identifier
-    struct Node *lhs; // left-hand side
-    struct Node *rhs; // right-hand side
-    int val;          // for number node
-    char name;        // for identifier
+    struct Node *lhs;    // left-hand side
+    struct Node *rhs;    // right-hand side
+    int val;             // for number node
+    char name;           // for identifier
+    char func_name[100]; // name of function
 } Node;
 
 extern Node *code[100];

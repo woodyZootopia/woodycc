@@ -35,24 +35,33 @@ void gen(Node *node) {
         printf("    push rdi\n");
     }
 
-    if (node->ty == ND_IF){
+    if (node->ty == ND_IF) {
         gen(node->lhs->lhs);
         gen(node->lhs->rhs);
         printf("    pop rax\n");
         printf("    pop rdi\n");
         printf("    cmp rdi, rax\n");
-        if(node->lhs->ty == ND_E) {
+        if (node->lhs->ty == ND_E) {
             printf("    jne .L2\n");
-        }
-        else if(node->lhs->ty == ND_NE) {
+        } else if (node->lhs->ty == ND_NE) {
             printf("    je .L2\n");
-        }
-        else {
+        } else {
             error2("either == or != should be used for condition", 0);
         }
         gen(node->rhs);
         printf("    pop rax\n");
         printf(".L2:\n");
+        return;
+    }
+
+    if (node->ty == ND_FUNC){
+        /* printf("    push rbp\n"); */
+        /* printf("    mov rbp, rsp\n"); */
+        /* printf("    sub rsp, 0\n"); */
+        printf("    call %s@PLT\n",node->func_name);
+        /* printf("    mov rsp, rbp\n"); */
+        /* printf("    pop rbp\n"); */
+        /* printf("    ret\n"); */
         return;
     }
 

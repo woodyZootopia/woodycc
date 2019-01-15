@@ -44,4 +44,8 @@ try "a=3;b=2;if(a==b)b=3;b;" 2
 try "a=2;b=2;if(a!=b)b=3;b;" 2
 try "a=3;b=2;if(a!=b)b=3;b;" 3
 
+./wdcc "foo();" > tmp.s
+gcc -o tmp tmp.s foo.o
+./tmp
+
 echo OK

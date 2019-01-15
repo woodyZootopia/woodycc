@@ -61,11 +61,26 @@ void tokenize(char *p) {
         }
 
         if (*p >= 'a' && *p <= 'z') {
-            tokens[i].ty = TK_IDENT;
-            tokens[i].input = p;
-            tokens[i].val = (int)*p;
-            i++;
-            p++;
+            if (isalnum(*(p + 1))) { // if followed by alnum, it's a function
+                char *tmp;
+                int j = 0;
+                for (tmp = p; *tmp != '('; tmp++)
+                    j++;
+                if (j >= 100)
+                    error2("function name longer than 100 character", i);
+                tokens[i].ty = TK_FUNC;
+                tokens[i].input = p;
+                strncpy(tokens[i].func_name, p, j);
+                tokens[i].func_name[j] = 0; // EOF
+                p = tmp;
+                i++;
+            } else {
+                tokens[i].ty = TK_IDENT;
+                tokens[i].input = p;
+                tokens[i].val = (int)*p;
+                i++;
+                p++;
+            }
             continue;
         }
 
@@ -102,6 +117,13 @@ Node *new_node_ident(char name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_IDENT;
     node->name = name;
+    return node;
+}
+
+Node *new_node_func(char name[]) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_FUNC;
+    strcpy(node->func_name, name);
     return node;
 }
 
@@ -168,6 +190,14 @@ Node *assign() {
 }
 
 Node *add() {
+    if (tokens[pos].ty == TK_FUNC) {
+        if (tokens[pos + 1].ty != '(')
+            error2("invalid function format.", pos);
+        if (tokens[pos + 2].ty != ')')
+            error2("invalid function format.", pos);
+        pos += 3;
+        return new_node_func(tokens[pos - 3].func_name);
+    }
     Node *lhs = mul();
     if (tokens[pos].ty == '+') {
         pos++;

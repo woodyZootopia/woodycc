@@ -13,7 +13,7 @@ void test_vector() {
     Vector *vec = new_vector();
     expect(__LINE__, 0, vec->len);
     for (long i = 0; i < 100; i++) {
-        // use long instead of i for 64 bit OS.
+        // use long instead of int for 64 bit OS.
         vec_push(vec, (void *)i);
     }
 
