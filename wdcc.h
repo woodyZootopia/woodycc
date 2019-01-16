@@ -37,10 +37,11 @@ enum {
 typedef struct Node {
     int ty; // must be set to some value; operator symbol itself, ND_NUM=256 for
             // number or ND_IDENT for identifier
-    struct Node *lhs;    // left-hand side
-    struct Node *rhs;    // right-hand side
-    int val;             // for number node
-    char name;           // for identifier
+    struct Node *lhs; // left-hand side
+    struct Node *rhs; // right-hand side
+    int val;   // for number node. for argument of function, the depth of the
+               // argument node
+    char name; // for identifier
     char func_name[100]; // name of function
 } Node;
 
@@ -62,6 +63,7 @@ void tokenize(char *p);
 
 Node *assign();
 Node *assign_prime();
+Node *argument();
 Node *add();
 Node *mul();
 Node *term();

@@ -48,4 +48,12 @@ try "a=3;b=2;if(a!=b)b=3;b;" 3
 gcc -o tmp tmp.s foo.o
 ./tmp
 
+./wdcc "bar(1,2);" > tmp.s
+gcc -o tmp tmp.s foo.o
+./tmp
+
+./wdcc "bag(6,10,3,4);" > tmp.s
+gcc -o tmp tmp.s foo.o
+./tmp
+
 echo OK

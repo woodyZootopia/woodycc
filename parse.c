@@ -37,7 +37,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/();={}", *p)) {
+        if (strchr("+-*/();={},", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -47,6 +47,7 @@ void tokenize(char *p) {
 
         if (isdigit(*p)) {
             tokens[i].ty = TK_NUM;
+            tokens[i].input = p;
             tokens[i].val = strtol(p, &p, 10);
             i++;
             continue;
@@ -120,9 +121,11 @@ Node *new_node_ident(char name) {
     return node;
 }
 
-Node *new_node_func(char name[]) {
+Node *new_node_func(char name[], Node *lhs, Node *rhs) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_FUNC;
+    node->lhs = lhs;
+    node->rhs = rhs;
     strcpy(node->func_name, name);
     return node;
 }
@@ -193,10 +196,21 @@ Node *add() {
     if (tokens[pos].ty == TK_FUNC) {
         if (tokens[pos + 1].ty != '(')
             error2("invalid function format.", pos);
-        if (tokens[pos + 2].ty != ')')
-            error2("invalid function format.", pos);
-        pos += 3;
-        return new_node_func(tokens[pos - 3].func_name);
+        char *func_name = tokens[pos].func_name;
+        if (tokens[pos + 2].ty == ')') {
+            pos += 3;
+            return new_node_func(func_name, NULL, NULL);
+        }
+        pos += 2;
+        Node *lhs = argument();
+        pos++;
+        int j = 0;
+        // mark ',' with depth of AST
+        for (Node *tmp = lhs; tmp->ty == ','; tmp = tmp->rhs) {
+            tmp->val = j;
+            j++;
+        }
+        return new_node_func(func_name, lhs, NULL);
     }
     Node *lhs = mul();
     if (tokens[pos].ty == '+') {
@@ -206,6 +220,16 @@ Node *add() {
     if (tokens[pos].ty == '-') {
         pos++;
         return new_node('-', lhs, add());
+    }
+    return lhs;
+}
+
+Node *argument() {
+    Node *lhs = add();
+    if (tokens[pos].ty == ',') {
+        pos++;
+        Node *rhs = argument();
+        return new_node(',', lhs, rhs);
     }
     return lhs;
 }

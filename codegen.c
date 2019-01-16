@@ -54,14 +54,58 @@ void gen(Node *node) {
         return;
     }
 
-    if (node->ty == ND_FUNC){
-        /* printf("    push rbp\n"); */
-        /* printf("    mov rbp, rsp\n"); */
-        /* printf("    sub rsp, 0\n"); */
-        printf("    call %s@PLT\n",node->func_name);
-        /* printf("    mov rsp, rbp\n"); */
-        /* printf("    pop rbp\n"); */
-        /* printf("    ret\n"); */
+    if (node->ty == ND_FUNC) {
+        if(node->lhs != NULL){
+            gen(node->lhs);
+        }
+        printf("    call %s\n", node->func_name);
+        return;
+    }
+
+    if (node->ty == ',') {
+        gen(node->lhs);
+        printf("    pop rax\n");
+        switch(node->val){
+            case 0:
+                printf("    mov rdi, rax\n");
+                break;
+            case 1:
+                printf("    mov rsi, rax\n");
+                break;
+            case 2:
+                printf("    mov rdx, rax\n");
+                break;
+            case 3:
+                printf("    mov rcx, rax\n");
+                break;
+            case 4:
+                printf("    mov r8, rax\n");
+                break;
+            case 5:
+                printf("    mov r9, rax\n");
+                break;
+        }
+        gen(node->rhs);
+        if(node->rhs->ty==ND_NUM){
+            printf("    pop rax\n");
+            switch(node->val){
+                case 0:
+                    printf("    mov rsi, rax\n");
+                    break;
+                case 1:
+                    printf("    mov rdx, rax\n");
+                    break;
+                case 2:
+                    printf("    mov rcx, rax\n");
+                    break;
+                case 3:
+                    printf("    mov r8, rax\n");
+                    break;
+                case 4:
+                    printf("    mov r9, rax\n");
+                    break;
+            }
+        }
         return;
     }
 
