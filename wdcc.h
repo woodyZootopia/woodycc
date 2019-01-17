@@ -9,10 +9,11 @@ enum {
     TK_NUM = 256, // integer token
     TK_IDENT,     // variable token
     TK_EOF,       // token representing the end of input
-    TK_IF,
-    TK_E,
-    TK_NE,
+    TK_IF,        // if statement
+    TK_E,         // equality
+    TK_NE,        // nonequality
     TK_FUNC,
+    TK_RETURN,
 };
 
 typedef struct {
@@ -32,6 +33,7 @@ enum {
     ND_E,
     ND_NE,
     ND_FUNC,
+    ND_RETURN,
 };
 
 typedef struct Node {

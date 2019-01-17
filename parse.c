@@ -61,6 +61,14 @@ void tokenize(char *p) {
             continue;
         }
 
+        if (!strncmp("return", p, 6)) {
+            tokens[i].ty = TK_RETURN;
+            tokens[i].input = p;
+            i++;
+            p += 6;
+            continue;
+        }
+
         if (*p >= 'a' && *p <= 'z') {
             if (isalnum(*(p + 1))) { // if followed by alnum, it's a function
                 char *tmp;
@@ -150,7 +158,11 @@ Node *paragraph() {
     }
     if (tokens[pos].ty == '{') {
         pos++;
-        Node *lhs = assign();
+        Node *lhs = paragraph();
+        if (tokens[pos].ty == '}') {
+            pos++;
+            return lhs;
+        }
         Node *rhs = paragraph_prime();
         return new_node('{', lhs, rhs);
     }
@@ -159,7 +171,7 @@ Node *paragraph() {
 }
 
 Node *paragraph_prime() {
-    Node *lhs = assign();
+    Node *lhs = paragraph();
     if (tokens[pos].ty == '}') {
         pos++;
         return lhs;
@@ -169,6 +181,12 @@ Node *paragraph_prime() {
 }
 
 Node *assign() {
+    if (tokens[pos].ty == TK_RETURN) {
+        pos++;
+        Node *lhs = add();
+        pos++;
+        return new_node(ND_RETURN, lhs, NULL);
+    }
     Node *lhs = add();
     if (tokens[pos].ty == ';') {
         pos++;
@@ -197,20 +215,27 @@ Node *add() {
         if (tokens[pos + 1].ty != '(')
             error2("invalid function format.", pos);
         char *func_name = tokens[pos].func_name;
+        Node *lhs;
         if (tokens[pos + 2].ty == ')') {
             pos += 3;
-            return new_node_func(func_name, NULL, NULL);
+            lhs = NULL;
+        } else {
+            pos += 2;
+            lhs = argument();
+            pos++;
+            int j = 0;
+            // mark ',' with depth from function to determine the register to
+            // mov
+            for (Node *tmp = lhs; tmp->ty == ','; tmp = tmp->rhs) {
+                tmp->val = j;
+                j++;
+            }
         }
-        pos += 2;
-        Node *lhs = argument();
-        pos++;
-        int j = 0;
-        // mark ',' with depth of AST
-        for (Node *tmp = lhs; tmp->ty == ','; tmp = tmp->rhs) {
-            tmp->val = j;
-            j++;
+        if (tokens[pos].ty != '{') {
+            return new_node_func(func_name, lhs, NULL);
         }
-        return new_node_func(func_name, lhs, NULL);
+        Node *rhs = paragraph();
+        return new_node_func(func_name, lhs, rhs);
     }
     Node *lhs = mul();
     if (tokens[pos].ty == '+') {

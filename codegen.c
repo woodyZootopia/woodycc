@@ -55,57 +55,80 @@ void gen(Node *node) {
     }
 
     if (node->ty == ND_FUNC) {
-        if(node->lhs != NULL){
+        if (node->rhs != NULL) {
+            printf("%s:\n", node->func_name);
+            printf("    push rbp\n");
+            printf("    mov rbp, rsp\n");
+            printf("    sub rsp, 208\n"); // 208=26*8 bytes allocated
+            gen(node->rhs);
+            printf("    pop rax\n");
+            printf("    mov rsp, rbp\n");
+            printf("    pop rbp\n");
+            printf("    ret\n");
+            return;
+        }
+        if (node->lhs != NULL) {
             gen(node->lhs);
         }
         printf("    call %s\n", node->func_name);
         return;
     }
 
+    if(node->ty == ND_RETURN){
+        gen(node->lhs);
+        return;
+    }
+
     if (node->ty == ',') {
         gen(node->lhs);
         printf("    pop rax\n");
-        switch(node->val){
-            case 0:
-                printf("    mov rdi, rax\n");
-                break;
-            case 1:
-                printf("    mov rsi, rax\n");
-                break;
-            case 2:
-                printf("    mov rdx, rax\n");
-                break;
-            case 3:
-                printf("    mov rcx, rax\n");
-                break;
-            case 4:
-                printf("    mov r8, rax\n");
-                break;
-            case 5:
-                printf("    mov r9, rax\n");
-                break;
+        switch (node->val) {
+        case 0:
+            printf("    mov rdi, rax\n");
+            break;
+        case 1:
+            printf("    mov rsi, rax\n");
+            break;
+        case 2:
+            printf("    mov rdx, rax\n");
+            break;
+        case 3:
+            printf("    mov rcx, rax\n");
+            break;
+        case 4:
+            printf("    mov r8, rax\n");
+            break;
+        case 5:
+            printf("    mov r9, rax\n");
+            break;
         }
         gen(node->rhs);
-        if(node->rhs->ty==ND_NUM){
+        if (node->rhs->ty == ND_NUM) {
             printf("    pop rax\n");
-            switch(node->val){
-                case 0:
-                    printf("    mov rsi, rax\n");
-                    break;
-                case 1:
-                    printf("    mov rdx, rax\n");
-                    break;
-                case 2:
-                    printf("    mov rcx, rax\n");
-                    break;
-                case 3:
-                    printf("    mov r8, rax\n");
-                    break;
-                case 4:
-                    printf("    mov r9, rax\n");
-                    break;
+            switch (node->val) {
+            case 0:
+                printf("    mov rsi, rax\n");
+                break;
+            case 1:
+                printf("    mov rdx, rax\n");
+                break;
+            case 2:
+                printf("    mov rcx, rax\n");
+                break;
+            case 3:
+                printf("    mov r8, rax\n");
+                break;
+            case 4:
+                printf("    mov r9, rax\n");
+                break;
             }
         }
+        return;
+    }
+
+    if (node->ty=='{'){
+        gen(node->lhs);
+        gen(node->rhs);
         return;
     }
 
