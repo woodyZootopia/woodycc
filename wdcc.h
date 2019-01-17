@@ -10,6 +10,7 @@ enum {
     TK_IDENT,     // variable token
     TK_EOF,       // token representing the end of input
     TK_IF,        // if statement
+    TK_WHILE,     // while statement
     TK_E,         // equality
     TK_NE,        // nonequality
     TK_FUNC,

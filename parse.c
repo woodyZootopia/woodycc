@@ -61,6 +61,14 @@ void tokenize(char *p) {
             continue;
         }
 
+        if (!strncmp("while", p, 5)) {
+            tokens[i].ty = TK_WHILE;
+            tokens[i].input = p;
+            i++;
+            p += 5;
+            continue;
+        }
+
         if (!strncmp("return", p, 6)) {
             tokens[i].ty = TK_RETURN;
             tokens[i].input = p;

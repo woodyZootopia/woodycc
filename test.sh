@@ -61,6 +61,13 @@ printf "main(){bag(6,10,3,4); return 0;} => "
 ./wdcc "foobar(){return 3+5;} main(){return foobar();}" > tmp.s
 gcc -o tmp tmp.s foo.o
 printf "foobar(){return 3+5;} main(){return foobar();} => "
+echo $?
+./tmp
+
+./wdcc "foobar(x,y){return x+y;} main(){return foobar(1,2);}" > tmp.s
+gcc -o tmp tmp.s foo.o
+printf "foobar(x,y){return x+y;} main(){return foobar(1,2);}"
+echo $?
 ./tmp
 
 echo OK
