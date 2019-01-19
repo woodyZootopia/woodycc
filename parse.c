@@ -219,32 +219,6 @@ Node *assign() {
 }
 
 Node *add() {
-    if (tokens[pos].ty == TK_FUNC) {
-        if (tokens[pos + 1].ty != '(')
-            error2("invalid function format.", pos);
-        char *func_name = tokens[pos].func_name;
-        Node *lhs;
-        if (tokens[pos + 2].ty == ')') {
-            pos += 3;
-            lhs = NULL;
-        } else {
-            pos += 2;
-            lhs = argument();
-            pos++;
-            int j = 0;
-            // mark ',' with depth from function to determine the register to
-            // mov
-            for (Node *tmp = lhs; tmp->ty == ','; tmp = tmp->rhs) {
-                tmp->val = j;
-                j++;
-            }
-        }
-        if (tokens[pos].ty != '{') {
-            return new_node_func(func_name, lhs, NULL);
-        }
-        Node *rhs = paragraph();
-        return new_node_func(func_name, lhs, rhs);
-    }
     Node *lhs = mul();
     if (tokens[pos].ty == '+') {
         pos++;
@@ -281,6 +255,32 @@ Node *mul() {
 }
 
 Node *term() {
+    if (tokens[pos].ty == TK_FUNC) {
+        if (tokens[pos + 1].ty != '(')
+            error2("invalid function format.", pos);
+        char *func_name = tokens[pos].func_name;
+        Node *lhs;
+        if (tokens[pos + 2].ty == ')') {
+            pos += 3;
+            lhs = NULL;
+        } else {
+            pos += 2;
+            lhs = argument();
+            pos++;
+            int j = 0;
+            // mark ',' with depth from function to determine the register to
+            // mov
+            for (Node *tmp = lhs; tmp->ty == ','; tmp = tmp->rhs) {
+                tmp->val = j;
+                j++;
+            }
+        }
+        if (tokens[pos].ty != '{') {
+            return new_node_func(func_name, lhs, NULL);
+        }
+        Node *rhs = paragraph();
+        return new_node_func(func_name, lhs, rhs);
+    }
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_IDENT)

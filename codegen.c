@@ -1,5 +1,7 @@
 #include "wdcc.h"
 
+int jump_num = 2;
+
 void gen_lval(Node *node) {
     if (node->ty != ND_IDENT) {
         error2("left hand side is not a variable", 0);
@@ -9,6 +11,59 @@ void gen_lval(Node *node) {
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
     printf("    push rax\n"); // rax is pointer to the variable
+}
+
+void gen_arg(Node *node) {
+    int depth = 0;
+    Node *tmp;
+    if (node->ty == ND_IDENT) {
+        gen_lval(node);
+        printf("    pop rax\n");
+        printf("    mov [rax], rdi\n");
+        return;
+    }
+    for (tmp = node; tmp->ty != ND_IDENT; tmp = tmp->rhs) {
+        gen_lval(tmp->lhs);
+        printf("    pop rax\n");
+        if (depth == 0) {
+            printf("    mov [rax], rdi\n");
+        }
+        if (depth == 1) {
+            printf("    mov [rax], rsi\n");
+        }
+        if (depth == 2) {
+            printf("    mov [rax], rdx\n");
+        }
+        if (depth == 3) {
+            printf("    mov [rax], rcx\n");
+        }
+        if (depth == 4) {
+            printf("    mov [rax], r8\n");
+        }
+        if (depth == 5) {
+            printf("    mov [rax], r9\n");
+        }
+        depth++;
+    }
+    gen_lval(tmp); // tmp is already the last argument
+    printf("    pop rax\n");
+    if (depth == 1) {
+        printf("    mov [rax], rsi\n");
+    }
+    if (depth == 2) {
+        printf("    mov [rax], rdx\n");
+    }
+    if (depth == 3) {
+        printf("    mov [rax], rcx\n");
+    }
+    if (depth == 4) {
+        printf("    mov [rax], r8\n");
+    }
+    if (depth == 5) {
+        printf("    mov [rax], r9\n");
+    }
+    return;
+    /* error2("function definition arguments should be identifier",0); */
 }
 
 void gen(Node *node) {
@@ -42,15 +97,15 @@ void gen(Node *node) {
         printf("    pop rdi\n");
         printf("    cmp rdi, rax\n");
         if (node->lhs->ty == ND_E) {
-            printf("    jne .L2\n");
+            printf("    jne .L%d\n", jump_num);
         } else if (node->lhs->ty == ND_NE) {
-            printf("    je .L2\n");
+            printf("    je .L%d\n", jump_num);
         } else {
             error2("either == or != should be used for condition", 0);
         }
         gen(node->rhs);
         printf("    pop rax\n");
-        printf(".L2:\n");
+        printf(".L%d:\n", jump_num++);
         return;
     }
 
@@ -60,22 +115,29 @@ void gen(Node *node) {
             printf("    push rbp\n");
             printf("    mov rbp, rsp\n");
             printf("    sub rsp, 208\n"); // 208=26*8 bytes allocated
+            if (node->lhs != NULL) {
+                gen_arg(node->lhs);
+            }
             gen(node->rhs);
-            printf("    pop rax\n");
-            printf("    mov rsp, rbp\n");
-            printf("    pop rbp\n");
-            printf("    ret\n");
             return;
         }
         if (node->lhs != NULL) {
             gen(node->lhs);
+            if (node->lhs->ty != ',') {
+                printf("    pop rdi\n");
+            }
         }
         printf("    call %s\n", node->func_name);
+        printf("    push rax\n");
         return;
     }
 
-    if(node->ty == ND_RETURN){
+    if (node->ty == ND_RETURN) {
         gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    mov rsp, rbp\n");
+        printf("    pop rbp\n");
+        printf("    ret\n");
         return;
     }
 
@@ -126,7 +188,7 @@ void gen(Node *node) {
         return;
     }
 
-    if (node->ty=='{'){
+    if (node->ty == '{') {
         gen(node->lhs);
         gen(node->rhs);
         return;

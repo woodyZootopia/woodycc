@@ -61,13 +61,39 @@ printf "main(){bag(6,10,3,4); return 0;} => "
 ./wdcc "foobar(){return 3+5;} main(){return foobar();}" > tmp.s
 gcc -o tmp tmp.s foo.o
 printf "foobar(){return 3+5;} main(){return foobar();} => "
-echo $?
 ./tmp
+echo $?
+
+./wdcc "foobar(x){return x;} main(){return foobar(1);}" > tmp.s
+gcc -o tmp tmp.s foo.o
+printf "foobar(x){return x;} main(){return foobar(1);} => "
+./tmp
+echo $?
 
 ./wdcc "foobar(x,y){return x+y;} main(){return foobar(1,2);}" > tmp.s
 gcc -o tmp tmp.s foo.o
-printf "foobar(x,y){return x+y;} main(){return foobar(1,2);}"
-echo $?
+printf "foobar(x,y){return x+y;} main(){return foobar(1,2);} => "
 ./tmp
+echo $?
+
+./wdcc "foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);}" > tmp.s
+gcc -o tmp tmp.s foo.o
+printf "foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);} => "
+./tmp
+echo $?
+
+./wdcc "fib(x){if(x==0)return 1;if(x==1)return 1; return fib(x-1)+fib(x-2);} main(){return fib(10);}" > tmp.s
+gcc -o tmp tmp.s foo.o
+printf "
+fib(x) {
+    if (x == 0)
+        return 1;
+    if (x == 1)
+        return 1;
+    return fib(x - 1) + fib(x - 2);
+}
+main() { return fib(10); } => "
+./tmp
+echo $?
 
 echo OK
