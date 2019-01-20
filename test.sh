@@ -76,24 +76,12 @@ printf "foobar(x,y){return x+y;} main(){return foobar(1,2);} => "
 ./tmp
 echo $?
 
-./wdcc "foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);} => "
-./tmp
-echo $?
+try 'foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);}' 3
 
-./wdcc "fib(x){if(x==0)return 1;if(x==1)return 1; return fib(x-1)+fib(x-2);} main(){return fib(10);}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "
-fib(x) {
-    if (x == 0)
-        return 1;
-    if (x == 1)
-        return 1;
-    return fib(x - 1) + fib(x - 2);
-}
-main() { return fib(10); } => "
-./tmp
-echo $?
+try "fib(x){if(x==0)return 1;if(x==1)return 1; return fib(x-1)+fib(x-2);} main(){return fib(10);}" 89
+
+try "powerroftwo(x){if(x==0)return 1; return 2*powerroftwo(x-1);} main(){return powerroftwo(5);}" 32
+
+try "powerroftwo(x,y){while(x!=0){y=y*2;x=x-1;} return y;} main(){return powerroftwo(5,1);}" 32
 
 echo OK

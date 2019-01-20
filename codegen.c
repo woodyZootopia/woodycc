@@ -90,19 +90,33 @@ void gen(Node *node) {
         printf("    push rdi\n");
     }
 
-    if (node->ty == ND_IF) {
-        gen(node->lhs->lhs);
-        gen(node->lhs->rhs);
+    if (node->ty==ND_E || node->ty==ND_NE){
+        gen(node->lhs);
+        gen(node->rhs);
         printf("    pop rax\n");
         printf("    pop rdi\n");
         printf("    cmp rdi, rax\n");
-        if (node->lhs->ty == ND_E) {
+        if (node->ty == ND_E) {
             printf("    jne .L%d\n", jump_num);
-        } else if (node->lhs->ty == ND_NE) {
+        } else if (node->ty == ND_NE) {
             printf("    je .L%d\n", jump_num);
         } else {
             error2("either == or != should be used for condition", 0);
         }
+    }
+
+    if (node->ty == ND_WHILE) {
+        printf(".Lbegin:\n");
+        gen(node->lhs);
+        gen(node->rhs);
+        printf("    pop rax\n");
+        printf("    jmp .Lbegin\n");
+        printf(".L%d:\n", jump_num++);
+        return;
+    }
+
+    if (node->ty == ND_IF) {
+        gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
         printf(".L%d:\n", jump_num++);

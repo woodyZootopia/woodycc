@@ -33,6 +33,7 @@ enum {
     ND_IF,
     ND_E,
     ND_NE,
+    ND_WHILE,
     ND_FUNC,
     ND_RETURN,
 };

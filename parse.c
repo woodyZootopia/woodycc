@@ -164,6 +164,15 @@ Node *paragraph() {
         Node *rhs = paragraph();
         return new_node(ND_IF, lhs, rhs);
     }
+    if (tokens[pos].ty == TK_WHILE) {
+        pos++;
+        if (tokens[pos].ty != '(') {
+            error2("while condition not stated", pos);
+        }
+        Node *lhs = assign();
+        Node *rhs = paragraph();
+        return new_node(ND_WHILE, lhs, rhs);
+    }
     if (tokens[pos].ty == '{') {
         pos++;
         Node *lhs = paragraph();
