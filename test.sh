@@ -18,14 +18,16 @@ try() {
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
-        echo "$input => $actual"
+        echo "$input
+$expected"
     else
-        echo "ERROR: \"$input\" expected $expected, but got $actual"
+        echo "ERROR: \"$input\" expects $expected, but got $actual"
         exit 1
     fi
 }
 
 # return value should be less than 256
+# tests basic arithmetics
 try "main(){return 0;}" 0
 try "main(){return 42;}" 42
 try 'main(){return 5+20-4;}' 21
@@ -48,7 +50,7 @@ try "main(){a=2;b=2;if(a!=b)b=3;return b;}" 2
 try "main(){a=3;b=2;if(a!=b)b=3;return b;}" 3
 
 
-# test printf function
+# test printf function(external function)
 try "main(){foo(); return 0;}" 0 "foo.o"
 
 try "main(){bar(1,2); return 0;}" 0 "foo.o"
@@ -70,4 +72,4 @@ try "powerroftwo(x){if(x==0)return 1; return 2*powerroftwo(x-1);} main(){return 
 
 try "powerroftwo(x,y){while(x!=0){y=y*2;x=x-1;} return y;} main(){return powerroftwo(5,1);}" 32
 
-echo OK
+echo PASSED ALL TESTS!
