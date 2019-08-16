@@ -16,3 +16,5 @@ format:
 
 clean:
 	rm -f wdcc *.o *~ tmp* *.out
+
+.PHONY: test clean
