@@ -38,6 +38,15 @@ enum {
     ND_RETURN,
 };
 
+typedef struct LVar {
+    struct LVar *next;
+    char *name;
+    int len;
+    int offset;
+} LVar;
+
+LVar *locals;
+
 typedef struct Node {
     int ty; // must be set to some value; operator symbol itself, ND_NUM=256 for
             // number or ND_IDENT for identifier
@@ -64,6 +73,8 @@ typedef struct {
 
 // prototype declaration
 void tokenize(char *p);
+
+LVar *find_lvar(Token *tok);
 
 Node *assign();
 Node *assign_prime();
