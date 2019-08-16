@@ -2,9 +2,14 @@
 try() {
     input="$1"
     expected="$2"
+    object_file="$3"
 
     ./wdcc "$input" > tmp.s
-    gcc -o tmp tmp.s
+    if [ $# == 3 ]; then
+        gcc -o tmp tmp.s $3
+    else
+        gcc -o tmp tmp.s
+    fi
     if [ $? == 1 ]; then
         echo "ERROR: object file created, but compile error"
         exit 1
@@ -43,38 +48,19 @@ try "main(){a=2;b=2;if(a!=b)b=3;return b;}" 2
 try "main(){a=3;b=2;if(a!=b)b=3;return b;}" 3
 
 
-./wdcc "main(){foo(); return 0;}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "main(){foo(); return 0;} => "
-./tmp
+# test printf function
+try "main(){foo(); return 0;}" 0 "foo.o"
 
-./wdcc "main(){bar(1,2); return 0;}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "main(){bar(1,2); return 0;} => "
-./tmp
+try "main(){bar(1,2); return 0;}" 0 "foo.o"
 
-./wdcc "main(){bag(6,10,3,4); return 0;}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "main(){bag(6,10,3,4); return 0;} => "
-./tmp
+try "main(){bag(6,10,3,4); return 0;}" 0 "foo.o"
 
-./wdcc "foobar(){return 3+5;} main(){return foobar();}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "foobar(){return 3+5;} main(){return foobar();} => "
-./tmp
-echo $?
+# test function definition
+try "foobar(){return 3+5;} main(){return foobar();}" 8 "foo.o"
 
-./wdcc "foobar(x){return x;} main(){return foobar(1);}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "foobar(x){return x;} main(){return foobar(1);} => "
-./tmp
-echo $?
+try "foobar(x){return x;} main(){return foobar(1);}" 1 "foo.o"
 
-./wdcc "foobar(x,y){return x+y;} main(){return foobar(1,2);}" > tmp.s
-gcc -o tmp tmp.s foo.o
-printf "foobar(x,y){return x+y;} main(){return foobar(1,2);} => "
-./tmp
-echo $?
+try "foobar(x,y){return x+y;} main(){return foobar(1,2);}" 3 "foo.o"
 
 try 'foobar(x){if(x!=1) return x; return 0;} main(){return foobar(3);}' 3
 
