@@ -7,7 +7,7 @@
 
 enum {
     TK_NUM = 256, // integer token
-    TK_IDENT,     // variable token
+    TK_LVAR,      // variable token
     TK_EOF,       // token representing the end of input
     TK_IF,        // if statement
     TK_WHILE,     // while statement
@@ -19,7 +19,8 @@ enum {
 
 typedef struct {
     int ty;              // token type
-    int val;             // if ty is TK_NUM/TK_IDENT, the value of it
+    int val;             // if ty is TK_NUM or less, the value of it
+    char str;            // if ty is TK_IDENT
     char *input;         // token character list for debugging
     char func_name[100]; // name of function
 } Token;
@@ -42,8 +43,8 @@ typedef struct Node {
     NodeKind ty;      // must be set to some value
     struct Node *lhs; // left-hand side
     struct Node *rhs; // right-hand side
-    int val;          // for ND_NUM. for argument of function, the depth of the
-                      // argument node
+    int val; // for ND_NUM or less. for argument of function, the depth of the
+             // argument node
     char func_name[100]; // for ND_FUNC
     int offset;          // offset of variable
 } Node;
@@ -51,10 +52,11 @@ typedef struct Node {
 extern Node *code[100];
 
 typedef struct LVar {
-    struct LVar *next;
-    char *name;
-    int len;
-    int offset;
+    // singly-linked list of local variables
+    struct LVar *next; // next local variable
+    char *name;        // name of the local variable
+    int len;           // length of the name
+    int offset;        // offset from RBP
 } LVar;
 
 LVar *locals;

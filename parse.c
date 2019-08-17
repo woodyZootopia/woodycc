@@ -94,7 +94,7 @@ void tokenize(char *p) {
                 p = tmp;
                 i++;
             } else {
-                tokens[i].ty = TK_IDENT;
+                tokens[i].ty = TK_LVAR;
                 tokens[i].input = p;
                 tokens[i].val = (int)*p;
                 p = tmp;
@@ -135,7 +135,7 @@ Node *new_node_num(int val) {
 Node *new_node_ident(NodeKind ty, char name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ty;
-    node->offset =('z' - name + 1) * 8;
+    node->offset = ('z' - name + 1) * 8;
     return node;
 }
 
@@ -297,7 +297,7 @@ Node *term() {
     }
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
-    if (tokens[pos].ty == TK_IDENT)
+    if (tokens[pos].ty == TK_LVAR)
         return new_node_ident(ND_LVAR, (char)tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
