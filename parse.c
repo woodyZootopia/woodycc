@@ -80,13 +80,13 @@ void tokenize(char *p) {
         if (*p >= 'a' && *p <= 'z') {
             char *tmp;
             int j = 0;
-            for (tmp = p; isalnum(*tmp) || *tmp == ' ';
-                 tmp++) // while following character is alnum or space...
+            for (tmp = p; isalnum(*tmp) || *tmp == ' '; tmp++)
+                // while following character is alnum or space...
                 j++;
             if (j >= 100)
                 error2("function/variable name longer than 100 character", i);
-            if (*tmp ==
-                '(') { // if the word is followed by '(', it's a function
+            if (*tmp == '(') {
+                // if the word is followed by '(', it's a function
                 tokens[i].ty = TK_FUNC;
                 tokens[i].input = p;
                 strncpy(tokens[i].func_name, p, j);
