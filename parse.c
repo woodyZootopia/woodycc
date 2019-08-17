@@ -117,7 +117,7 @@ int pos = 0;
 
 Node *code[100];
 
-Node *new_node(int ty, Node *lhs, Node *rhs) {
+Node *new_node(NodeKind ty, Node *lhs, Node *rhs) {
     Node *node = malloc(sizeof(Node));
     node->ty = ty;
     node->lhs = lhs;
@@ -132,10 +132,10 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_ident(char name) {
+Node *new_node_ident(NodeKind ty, char name) {
     Node *node = malloc(sizeof(Node));
-    node->ty = ND_IDENT;
-    node->name = name;
+    node->ty = ty;
+    node->offset =('z' - name + 1) * 8;
     return node;
 }
 
@@ -212,6 +212,9 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
+        if (lhs->ty != ND_LVAR) {
+            error2("left hand side of assignment is not identifier", pos);
+        }
         pos++;
         Node *rhs = assign();
         return new_node('=', lhs, rhs);
@@ -295,7 +298,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_IDENT)
-        return new_node_ident((char)tokens[pos++].val);
+        return new_node_ident(ND_LVAR, (char)tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();

@@ -27,16 +27,28 @@ typedef struct {
 extern Token tokens[100];
 
 /* ==================== node ==================== */
-enum {
-    ND_NUM = 256, // type of integer/identifier node
-    ND_IDENT,     // type of identifier node
-    ND_IF,
-    ND_E,
-    ND_NE,
-    ND_WHILE,
-    ND_FUNC,
-    ND_RETURN,
-};
+typedef enum {
+    ND_NUM = 256, // integer
+    ND_LVAR,      // local variable
+    ND_IF,        // if
+    ND_E,         // ==
+    ND_NE,        // !=
+    ND_WHILE,     // while
+    ND_FUNC,      // function
+    ND_RETURN,    // return
+} NodeKind;
+
+typedef struct Node {
+    NodeKind ty;      // must be set to some value
+    struct Node *lhs; // left-hand side
+    struct Node *rhs; // right-hand side
+    int val;          // for ND_NUM. for argument of function, the depth of the
+                      // argument node
+    char func_name[100]; // for ND_FUNC
+    int offset;          // offset of variable
+} Node;
+
+extern Node *code[100];
 
 typedef struct LVar {
     struct LVar *next;
@@ -46,19 +58,6 @@ typedef struct LVar {
 } LVar;
 
 LVar *locals;
-
-typedef struct Node {
-    int ty; // must be set to some value; operator symbol itself, ND_NUM=256 for
-            // number or ND_IDENT for identifier
-    struct Node *lhs; // left-hand side
-    struct Node *rhs; // right-hand side
-    int val;   // for number node. for argument of function, the depth of the
-               // argument node
-    char name; // for identifier
-    char func_name[100]; // name of function
-} Node;
-
-extern Node *code[100];
 
 typedef struct {
     void **data;
