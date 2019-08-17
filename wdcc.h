@@ -18,11 +18,13 @@ enum {
 };
 
 typedef struct {
+    // TODO: str and func_name has the same purpose. Can be removed
     int ty;              // token type
     int val;             // if ty is TK_NUM or less, the value of it
-    char str;            // if ty is TK_IDENT
+    char str[100];       // if ty is TK_LVAR
     char *input;         // token character list for debugging
     char func_name[100]; // name of function
+    int len;             // length of name
 } Token;
 
 extern Token tokens[100];

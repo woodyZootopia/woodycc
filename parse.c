@@ -96,7 +96,9 @@ void tokenize(char *p) {
             } else {
                 tokens[i].ty = TK_LVAR;
                 tokens[i].input = p;
-                tokens[i].val = (int)*p;
+                strncpy(tokens[i].str, p, j);
+                tokens[i].str[j] = 0; // EOF
+                tokens[i].len = j;
                 p = tmp;
                 i++;
             }
@@ -132,10 +134,19 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_lvar(char name) {
+/* LVar *find_lvar(Token *tok) { */
+/*     for (Lvar *var = locals; var; var = var->next) { */
+/*         if (var->len == tok->len && memcmp(tok->str, var->name, var->len)) */
+/*             return var; */
+/*         return NULL; */
+/*     } */
+/* } */
+
+Node *new_node_lvar(char *name) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
-    node->offset = ('z' - name + 1) * 8;
+    // TODO: only expects one character variable
+    node->offset = ('z' - name[0] + 1) * 8;
     return node;
 }
 
@@ -298,7 +309,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar((char)tokens[pos++].val);
+        return new_node_lvar(tokens[pos++].str);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();
