@@ -88,20 +88,15 @@ void tokenize(char *p) {
             if (*tmp == '(') {
                 // if the word is followed by '(', it's a function
                 tokens[i].ty = TK_FUNC;
-                tokens[i].input = p;
-                strncpy(tokens[i].func_name, p, j);
-                tokens[i].func_name[j] = 0; // EOF
-                p = tmp;
-                i++;
             } else {
                 tokens[i].ty = TK_LVAR;
-                tokens[i].input = p;
-                strncpy(tokens[i].str, p, j);
-                tokens[i].str[j] = 0; // EOF
-                tokens[i].len = j;
-                p = tmp;
-                i++;
             }
+            tokens[i].input = p;
+            strncpy(tokens[i].name, p, j);
+            tokens[i].name[j] = 0; // EOF
+            tokens[i].len = j;
+            p = tmp;
+            i++;
             continue;
         }
 
@@ -134,13 +129,13 @@ Node *new_node_num(int val) {
     return node;
 }
 
-/* LVar *find_lvar(Token *tok) { */
-/*     for (Lvar *var = locals; var; var = var->next) { */
-/*         if (var->len == tok->len && memcmp(tok->str, var->name, var->len)) */
-/*             return var; */
-/*         return NULL; */
-/*     } */
-/* } */
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next) {
+        if (var->len == tok->len && memcmp(tok->name, var->name, var->len))
+            return var;
+        return NULL;
+    }
+}
 
 Node *new_node_lvar(char *name) {
     Node *node = malloc(sizeof(Node));
@@ -283,7 +278,7 @@ Node *term() {
     if (tokens[pos].ty == TK_FUNC) {
         if (tokens[pos + 1].ty != '(')
             error2("invalid function format.", pos);
-        char *func_name = tokens[pos].func_name;
+        char *func_name = tokens[pos].name;
         Node *lhs;
         if (tokens[pos + 2].ty == ')') {
             pos += 3;
@@ -309,7 +304,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar(tokens[pos++].str);
+        return new_node_lvar(tokens[pos++].name);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();
