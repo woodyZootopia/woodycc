@@ -72,6 +72,6 @@ try "powerroftwo(x){if(x==0)return 1; return 2*powerroftwo(x-1);} main(){return 
 try "powerroftwo(x,y){while(x!=0){y=y*2;x=x-1;} return y;} main(){return powerroftwo(5,1);}" 32
 
 echo "LINENO:$LINENO"
-try "main(){bar=3; return 0;}" 0
+try "main(){foo=2;bar=3; return foo+bar;}" 5
 
 echo PASSED ALL TESTS!

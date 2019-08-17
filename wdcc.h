@@ -59,7 +59,7 @@ typedef struct LVar {
     int offset;        // offset from RBP
 } LVar;
 
-LVar *locals;
+extern LVar *locals;
 
 typedef struct {
     void **data;

@@ -1,6 +1,9 @@
 #include "wdcc.h"
 
+LVar *locals;
+
 int main(int argc, char **argv) {
+    locals = malloc(sizeof(LVar));
     if (argc != 2) {
         return 1;
     }

@@ -131,17 +131,29 @@ Node *new_node_num(int val) {
 
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) {
-        if (var->len == tok->len && memcmp(tok->name, var->name, var->len))
+        if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
             return var;
-        return NULL;
     }
+    return NULL;
 }
 
-Node *new_node_lvar(char *name) {
+Node *new_node_lvar(Token *tok) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
-    node->offset = ('z' - name[0] + 1) * 8;
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+        node->offset = lvar->offset;
+    } else {
+        lvar = calloc(1, sizeof(LVar));
+        lvar->next = locals;
+        lvar->name = tok->name;
+        lvar->len = tok->len;
+        lvar->offset = locals->offset + 8;
+        node->offset = lvar->offset;
+        locals = lvar;
+    }
+    /* node->offset = ('z' - tok->name[0] + 1) * 8; */
     return node;
 }
 
@@ -304,7 +316,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar(tokens[pos++].name);
+        return new_node_lvar(&tokens[pos++]);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();
