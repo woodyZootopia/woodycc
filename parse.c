@@ -132,9 +132,9 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_ident(NodeKind ty, char name) {
+Node *new_node_lvar(char name) {
     Node *node = malloc(sizeof(Node));
-    node->ty = ty;
+    node->ty = ND_LVAR;
     node->offset = ('z' - name + 1) * 8;
     return node;
 }
@@ -298,7 +298,7 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_ident(ND_LVAR, (char)tokens[pos++].val);
+        return new_node_lvar((char)tokens[pos++].val);
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();
