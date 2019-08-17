@@ -71,6 +71,7 @@ try "fib(x){if(x==0)return 1;if(x==1)return 1; return fib(x-1)+fib(x-2);} main()
 try "powerroftwo(x){if(x==0)return 1; return 2*powerroftwo(x-1);} main(){return powerroftwo(5);}" 32
 try "powerroftwo(x,y){while(x!=0){y=y*2;x=x-1;} return y;} main(){return powerroftwo(5,1);}" 32
 
+# test multiple character local variable
 echo "LINENO:$LINENO"
 try "main(){foo=2;bar=3; return foo+bar;}" 5
 
