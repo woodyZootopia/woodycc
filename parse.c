@@ -77,6 +77,14 @@ void tokenize(char *p) {
             continue;
         }
 
+        if (!strncmp("int", p, 3)) {
+            tokens[i].ty = TK_TYPE;
+            tokens[i].input = p;
+            i++;
+            p += 3;
+            continue;
+        }
+
         if (*p >= 'a' && *p <= 'z') {
             char *tmp;
             int j = 0;
@@ -138,14 +146,14 @@ LVar *find_lvar(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok) {
+Node *new_node_lvar(Token *tok, int declaration) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
     LVar *lvar = find_lvar(tok);
     if (lvar) {
         node->offset = lvar->offset;
-    } else {
+    } else if (declaration) {
         lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = tok->name;
@@ -153,6 +161,8 @@ Node *new_node_lvar(Token *tok) {
         lvar->offset = locals->offset + 8;
         node->offset = lvar->offset;
         locals = lvar;
+    } else {
+        error2("The variable is not declared:%s", pos-1);
     }
     return node;
 }
@@ -316,7 +326,21 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar(&tokens[pos++]);
+        return new_node_lvar(&tokens[pos++], 0);
+    if (tokens[pos].ty == TK_TYPE) {
+        switch(tokens[pos+1].ty){
+            case TK_FUNC:
+                pos++;
+                return term();
+                break;
+            case TK_LVAR:
+                pos++;
+                return new_node_lvar(&tokens[pos++], 1);
+                break;
+            default:
+                error2("int declaration is followed by something other than function or variable", pos);
+        }
+    }
     if (tokens[pos].ty == '(') {
         pos++;
         Node *node = assign();

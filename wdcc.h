@@ -15,6 +15,7 @@ enum {
     TK_NE,        // nonequality
     TK_FUNC,
     TK_RETURN,
+    TK_TYPE,
 };
 
 typedef struct {
