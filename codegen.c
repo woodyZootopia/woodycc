@@ -67,21 +67,17 @@ void gen_arg(Node *node) {
 }
 
 void gen(Node *node) {
-    // CLEAN: substitute if(node->ty ...) with switch/case
-    if (node->ty == ND_NUM) {
+    switch (node->ty) {
+    case ND_NUM:
         printf("    push %d\n", node->val);
         return;
-    }
-
-    if (node->ty == ND_LVAR) {
+    case ND_LVAR:
         gen_lval(node);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
-    }
-
-    if (node->ty == '=') {
+    case '=':
         gen_lval(node->lhs);
         gen(node->rhs);
 
@@ -89,9 +85,9 @@ void gen(Node *node) {
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
-    }
-
-    if (node->ty == ND_E || node->ty == ND_NE) {
+        return;
+    case ND_E:
+    case ND_NE:
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
@@ -104,9 +100,8 @@ void gen(Node *node) {
         } else {
             error2("either == or != should be used for condition", 0);
         }
-    }
-
-    if (node->ty == ND_WHILE) {
+        return;
+    case ND_WHILE:
         printf(".Lbegin:\n");
         gen(node->lhs);
         gen(node->rhs);
@@ -114,17 +109,13 @@ void gen(Node *node) {
         printf("    jmp .Lbegin\n");
         printf(".L%d:\n", jump_num++);
         return;
-    }
-
-    if (node->ty == ND_IF) {
+    case ND_IF:
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
         printf(".L%d:\n", jump_num++);
         return;
-    }
-
-    if (node->ty == ND_FUNC) {
+    case ND_FUNC:
         if (node->rhs != NULL) {
             printf("%s:\n", node->func_name);
             printf("    push rbp\n");
@@ -145,18 +136,14 @@ void gen(Node *node) {
         printf("    call %s\n", node->func_name);
         printf("    push rax\n");
         return;
-    }
-
-    if (node->ty == ND_RETURN) {
+    case ND_RETURN:
         gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
         return;
-    }
-
-    if (node->ty == ',') {
+    case ',':
         gen(node->lhs);
         printf("    pop rax\n");
         switch (node->val) {
@@ -201,21 +188,15 @@ void gen(Node *node) {
             }
         }
         return;
-    }
-
-    if (node->ty == '{') {
+    case '{':
         gen(node->lhs);
         gen(node->rhs);
         return;
-    }
-
-    if (node->ty == ND_ADDR) {
+    case ND_ADDR:
         // TODO: can't process &(x+1)
         gen_lval(node->lhs);
         return;
-    }
-
-    if (node->ty == ND_DEREF) {
+    case ND_DEREF:
         gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
