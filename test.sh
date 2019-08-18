@@ -75,4 +75,8 @@ try "powerroftwo(x,y){while(x!=0){y=y*2;x=x-1;} return y;} main(){return powerro
 echo "LINENO:$LINENO"
 try "main(){foo=2;bar=3; return foo+bar;}" 5
 
+# test pointer
+echo "LINENO:$LINENO"
+try "main(){x=3; y=&x; return *y;}" 3
+
 echo PASSED ALL TESTS!
