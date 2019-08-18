@@ -91,7 +91,7 @@ void gen(Node *node) {
         printf("    push rdi\n");
     }
 
-    if (node->ty==ND_E || node->ty==ND_NE){
+    if (node->ty == ND_E || node->ty == ND_NE) {
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
@@ -206,6 +206,20 @@ void gen(Node *node) {
     if (node->ty == '{') {
         gen(node->lhs);
         gen(node->rhs);
+        return;
+    }
+
+    if (node->ty == ND_ADDR) {
+        // TODO: can't process &(x+1)
+        gen_lval(node->lhs);
+        return;
+    }
+
+    if (node->ty == ND_DEREF) {
+        gen(node->lhs);
+        printf("    pop rax\n");
+        printf("    mov rax, [rax]\n");
+        printf("    push rax\n");
         return;
     }
 

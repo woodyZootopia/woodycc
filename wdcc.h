@@ -32,6 +32,8 @@ typedef enum {
     // 0 to 255 is reserved for some of one character operations, like = or +
     ND_NUM = 256, // integer
     ND_LVAR,      // local variable
+    ND_ADDR,      // & for &(local var)
+    ND_DEREF,     // * for *(local var)
     ND_IF,        // if
     ND_E,         // ==
     ND_NE,        // !=

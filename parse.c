@@ -37,7 +37,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("+-*/();={},", *p)) {
+        if (strchr("&+-*/();={},", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -324,6 +324,16 @@ Node *term() {
             error2("No closing bracket corresponding to the opening:%s", pos);
         pos++;
         return node;
+    }
+    if (tokens[pos].ty == '&') {
+        pos++;
+        Node *lhs = term();
+        return new_node(ND_ADDR, lhs, NULL);
+    }
+    if (tokens[pos].ty == '*') {
+        pos++;
+        Node *lhs = term();
+        return new_node(ND_DEREF, lhs, NULL);
     }
     error2("The token is uninterpretable:%s", pos);
 }
