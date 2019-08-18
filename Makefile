@@ -18,3 +18,5 @@ clean:
 	rm -f wdcc *.o *~ tmp* *.out
 
 .PHONY: test clean
+# remove object files except for foo.o
+.INTERMEDIATE: $(filter-out foo.o, $(OBJS))
