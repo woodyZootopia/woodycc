@@ -5,7 +5,7 @@
 
 /* ==================== token ==================== */
 
-enum {
+typedef enum {
     TK_NUM = 256, // integer token
     TK_LVAR,      // variable token
     TK_EOF,       // token representing the end of input
@@ -16,10 +16,10 @@ enum {
     TK_FUNC,
     TK_RETURN,
     TK_TYPE,
-};
+} TokenKind;
 
 typedef struct {
-    int ty;         // token type
+    TokenKind ty;         // token type
     int val;        // if ty is TK_NUM or less, the value of it
     char name[100]; // if ty is TK_LVAR/TK_FUNC
     char *input;    // token character list for debugging
