@@ -115,6 +115,7 @@ int pos = 0;
 Node *code[100];
 
 Node *new_node(NodeKind ty, Node *lhs, Node *rhs) {
+    // for nodes which is NOT number, function, local variable i.e. "if"
     Node *node = malloc(sizeof(Node));
     node->ty = ty;
     node->lhs = lhs;
@@ -153,7 +154,6 @@ Node *new_node_lvar(Token *tok) {
         node->offset = lvar->offset;
         locals = lvar;
     }
-    /* node->offset = ('z' - tok->name[0] + 1) * 8; */
     return node;
 }
 

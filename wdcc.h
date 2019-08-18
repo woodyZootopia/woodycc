@@ -29,6 +29,7 @@ extern Token tokens[100];
 
 /* ==================== node ==================== */
 typedef enum {
+    // 0 to 255 is reserved for some of one character operations, like = or +
     ND_NUM = 256, // integer
     ND_LVAR,      // local variable
     ND_IF,        // if

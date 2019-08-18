@@ -10,7 +10,7 @@ void gen_lval(Node *node) {
     int offset = node->offset;
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
-    printf("    push rax\n"); // rax is pointer to the variable
+    printf("    push rax\n"); // now rax is the pointer to the variable
 }
 
 void gen_arg(Node *node) {
@@ -67,6 +67,7 @@ void gen_arg(Node *node) {
 }
 
 void gen(Node *node) {
+    // CLEAN: substitute if(node->ty ...) with switch/case
     if (node->ty == ND_NUM) {
         printf("    push %d\n", node->val);
         return;
