@@ -153,7 +153,10 @@ Node *new_node_lvar(Token *tok, int declaration) {
     LVar *lvar = find_lvar(tok);
     if (lvar) {
         node->offset = lvar->offset;
-    } else if (declaration) {
+    } else {
+        if(!declaration){
+            error2("The variable is not declared:%s", pos-1);
+        }
         lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = tok->name;
@@ -161,8 +164,6 @@ Node *new_node_lvar(Token *tok, int declaration) {
         lvar->offset = locals->offset + 8;
         node->offset = lvar->offset;
         locals = lvar;
-    } else {
-        error2("The variable is not declared:%s", pos-1);
     }
     return node;
 }
