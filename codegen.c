@@ -78,7 +78,11 @@ void gen(Node *node) {
         printf("    push rax\n");
         return;
     case '=':
-        gen_lval(node->lhs);
+        if (node->lhs->ty == ND_DEREF) {
+            gen(node->lhs->lhs);
+        } else {
+            gen_lval(node->lhs);
+        }
         gen(node->rhs);
 
         printf("    pop rdi\n");

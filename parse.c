@@ -261,8 +261,8 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
-        if (lhs->ty != ND_LVAR) {
-            error2("left hand side of assignment is not identifier", pos);
+        if (!(lhs->ty == ND_LVAR || lhs->ty == ND_DEREF)) {
+            error2("left hand side of assignment is not identifier:", pos);
         }
         pos++;
         Node *rhs = assign();
