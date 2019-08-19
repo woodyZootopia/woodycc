@@ -146,7 +146,7 @@ LVar *find_lvar(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok, int declaration) {
+Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
@@ -154,13 +154,33 @@ Node *new_node_lvar(Token *tok, int declaration) {
     if (lvar) {
         node->offset = lvar->offset;
     } else {
-        if(!declaration){
-            error2("The variable is not declared:%s", pos-1);
+        if (!declaration) {
+            error2("The variable is not declared:%s", pos - 1);
         }
         lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = tok->name;
         lvar->len = tok->len;
+        if (pointer_depth != 0) {
+            lvar->type = malloc(sizeof(Type));
+            lvar->type->ty = PTR;
+            Type *p = malloc(sizeof(Type));
+            lvar->type->ptr_to = p;
+            pointer_depth--;
+            Type *pbefore = p;
+            for (; pointer_depth >= 0; pointer_depth--) {
+                Type *p = malloc(sizeof(Type));
+                if (pointer_depth == 0) {
+                    p->ty = INT;
+                    break;
+                }
+                p->ty = PTR;
+                p->ptr_to = pbefore;
+            }
+        } else {
+            lvar->type = malloc(sizeof(Type));
+            lvar->type->ty = INT;
+        }
         lvar->offset = locals->offset + 8;
         node->offset = lvar->offset;
         locals = lvar;
@@ -327,20 +347,26 @@ Node *term() {
     if (tokens[pos].ty == TK_NUM)
         return new_node_num(tokens[pos++].val);
     if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar(&tokens[pos++], 0);
+        return new_node_lvar(&tokens[pos++], 0, 0);
     if (tokens[pos].ty == TK_TYPE) {
-        switch(tokens[pos+1].ty){
-            case TK_FUNC:
-                pos++;
-                return term();
-                break;
-            case TK_LVAR:
-                pos++;
-                return new_node_lvar(&tokens[pos++], 1);
-                break;
-            default:
-                error2("int declaration is followed by something other than function or variable", pos);
+        if (tokens[pos + 1].ty == TK_FUNC) {
+            pos++;
+            return term();
         }
+        if (tokens[pos + 1].ty == TK_LVAR) {
+            pos++;
+            return new_node_lvar(&tokens[pos++], 1, 0);
+        }
+        if (tokens[pos + 1].ty == '*') {
+            int j = 0;
+            while (tokens[++pos].ty == '*') {
+                j++;
+            }
+            return new_node_lvar(&tokens[pos++], 1, j);
+        }
+        error2("int declaration is followed by something other than function "
+               "or variable",
+               pos);
     }
     if (tokens[pos].ty == '(') {
         pos++;

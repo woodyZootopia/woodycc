@@ -55,12 +55,18 @@ typedef struct Node {
 
 extern Node *code[100];
 
+typedef struct Type {
+    enum {INT, PTR} ty;
+    struct Type *ptr_to;
+}Type;
+
 typedef struct LVar {
     // singly-linked list of local variables
     struct LVar *next; // next local variable
     char *name;        // name of the local variable
     int len;           // length of the name
     int offset;        // offset from RBP
+    Type *type;  // type of the variable
 } LVar;
 
 extern LVar *locals;
