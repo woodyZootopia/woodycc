@@ -80,5 +80,9 @@ try "int main(){int foo; int bar; foo=2;bar=3; return foo+bar;}" 5
 echo "LINENO:$LINENO"
 try "int main(){int x; int y; x=3; y=&x; return *y;}" 3
 try "int main(){int x; int *y; y=&x; *y=3; return x;}" 3
-
+# pointer arithmetic
+try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); return *p;}" 1 foo.o
+try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p; return *q;}" 1 foo.o
+try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 4; return *q;}" 2 foo.o
+try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 8; return *q;}" 4 foo.o
 echo PASSED ALL TESTS!
