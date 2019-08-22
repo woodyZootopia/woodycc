@@ -45,8 +45,9 @@ typedef enum {
 } NodeKind;
 
 typedef struct Type {
-    enum { INT, PTR } ty;
+    enum { INT, PTR, ARRAY } ty;
     struct Type *ptr_to;
+    size_t array_size;
 } Type;
 
 typedef struct LVar {

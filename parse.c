@@ -37,7 +37,7 @@ void tokenize(char *p) {
             continue;
         }
 
-        if (strchr("&+-*/();={},", *p)) {
+        if (strchr("&+-*/();={},[]", *p)) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;
@@ -370,7 +370,15 @@ Node *term() {
         }
         if (tokens[pos + 1].ty == TK_LVAR) {
             pos++;
-            return new_node_lvar(&tokens[pos++], 1, 0);
+            if (tokens[pos+1].ty == '[') { // array definition
+                Node *node = new_node_lvar(&tokens[pos++], 1, 1); // variable is pointer to int
+                node->lvar->type->array_size = tokens[++pos].val;
+                pos+=2;
+                return node;
+            } else {
+                Node *node = new_node_lvar(&tokens[pos++], 1, 0);
+                return node;
+            }
         }
         if (tokens[pos + 1].ty == '*') {
             int j = 0;

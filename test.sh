@@ -97,4 +97,8 @@ try "int main(){return sizeof(3)+4;}" 8
 try "int main(){int a; a = sizeof(3); return a;}" 4
 try "int main(){int *a; return sizeof a;}" 8
 
+# array
+echo "LINENO:$LINENO"
+try "int main(){int a[10]; return 0;}" 0
+
 echo PASSED ALL TESTS!
