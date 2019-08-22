@@ -152,7 +152,7 @@ Node *new_node_num(int val) {
 }
 
 LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next) {
+    for (LVar *var = locals; var; var = var->prev) {
         if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
             return var;
     }
@@ -171,7 +171,7 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
             error2("The variable is not declared:%s", pos - 1);
         }
         lvar = calloc(1, sizeof(LVar));
-        lvar->next = locals; // link
+        lvar->prev = locals; // link
         lvar->name = tok->name;
         lvar->len = tok->len;
         node->lvar = lvar;

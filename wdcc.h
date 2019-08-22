@@ -52,7 +52,7 @@ typedef struct Type {
 
 typedef struct LVar {
     // singly-linked list of local variables
-    struct LVar *next; // next local variable
+    struct LVar *prev; // next local variable
     char *name;        // name of the local variable
     int len;           // length of the name
     int offset;        // offset from RBP
