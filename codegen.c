@@ -185,7 +185,7 @@ void gen(Node *node) {
             break;
         }
         gen(node->rhs);
-        if (node->rhs->ty == ND_NUM) {
+        if (node->rhs->ty != ',') {
             printf("    pop rax\n");
             switch (node->val) {
             case 0:
