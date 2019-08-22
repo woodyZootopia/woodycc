@@ -88,10 +88,15 @@ void tokenize(char *p) {
         if (*p >= 'a' && *p <= 'z') {
             char *tmp;
             int j = 0;
+            int k = 0;
+            for (tmp = p; isalnum(*tmp); tmp++)
+                // while following character is alnum...
+                j++;
+            k = j;
             for (tmp = p; isalnum(*tmp) || *tmp == ' '; tmp++)
                 // while following character is alnum or space...
-                j++;
-            if (j >= 100)
+                k++;
+            if (k >= 100)
                 error2("function/variable name longer than 100 character", i);
             if (*tmp == '(') {
                 // if the word is followed by '(', it's a function
