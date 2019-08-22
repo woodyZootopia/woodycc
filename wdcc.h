@@ -66,7 +66,6 @@ typedef struct Node {
     int val; // for ND_NUM or less. for argument of function, the depth of the
              // argument node
     char func_name[100]; // for ND_FUNC
-    int offset;          // offset of variable
     LVar *lvar;          // if ty==ND_LVAR,  pointer to corresponding lvar
 } Node;
 

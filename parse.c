@@ -164,10 +164,9 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
     LVar *lvar = find_lvar(tok);
-    if (lvar) {
-        node->offset = lvar->offset;
+    if (lvar) { // already used
         node->lvar = lvar;
-    } else {
+    } else { // newly used
         if (!declaration) {
             error2("The variable is not declared:%s", pos - 1);
         }
@@ -197,7 +196,6 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
             lvar->type->ty = INT;
         }
         lvar->offset = locals->offset + 8;
-        node->offset = lvar->offset;
         locals = lvar;
     }
     return node;

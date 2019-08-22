@@ -7,7 +7,7 @@ void gen_lval(Node *node) {
         error2("left hand side is not a variable", 0);
     }
 
-    int offset = node->offset;
+    int offset = node->lvar->offset;
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
     printf("    push rax\n"); // now rax is the pointer to the variable
