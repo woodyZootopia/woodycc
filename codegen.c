@@ -69,22 +69,28 @@ void gen_arg(Node *node) {
 void gen(Node *node) {
     switch (node->ty) {
     case ND_NUM:
+        printf("# push immediate at %d\n", __LINE__);
         printf("    push %d\n", node->val);
         return;
     case ND_LVAR:
+        printf("# generate lhs at %d\n", __LINE__);
         gen_lval(node);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
     case '=':
+        printf("# assignment at %d\n", __LINE__);
         if (node->lhs->ty == ND_DEREF) {
+            printf("# generate lhs (pointer dereference at %d)\n", __LINE__);
             gen(node->lhs->lhs);
         } else {
+            printf("# generate lhs at %d\n", __LINE__);
             gen_lval(node->lhs);
         }
         gen(node->rhs);
 
+        printf("# assign at %d\n", __LINE__);
         printf("    pop rdi\n");
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
@@ -92,6 +98,7 @@ void gen(Node *node) {
         return;
     case ND_E:
     case ND_NE:
+        printf("# equality/nonequality at %d\n", __LINE__);
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
@@ -106,6 +113,7 @@ void gen(Node *node) {
         }
         return;
     case ND_WHILE:
+        printf("# while at %d\n", __LINE__);
         printf(".Lbegin:\n");
         gen(node->lhs);
         gen(node->rhs);
@@ -114,19 +122,22 @@ void gen(Node *node) {
         printf(".L%d:\n", jump_num++);
         return;
     case ND_IF:
+        printf("# if at %d\n", __LINE__);
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
         printf(".L%d:\n", jump_num++);
         return;
     case ND_FUNC:
-        if (node->rhs != NULL) {
+        printf("# function at %d\n", __LINE__);
+        if (node->rhs != NULL) { // function definition
             printf("%s:\n", node->func_name);
             printf("    push rbp\n");
             printf("    mov rbp, rsp\n");
             printf("    sub rsp, %d\n",
                    locals->offset); // `offset` bytes allocated
             if (node->lhs != NULL) {
+                printf("# argument assignment at %d\n", __LINE__);
                 gen_arg(node->lhs);
             }
             gen(node->rhs);
@@ -142,7 +153,9 @@ void gen(Node *node) {
         printf("    push rax\n");
         return;
     case ND_RETURN:
+        printf("# return at %d\n", __LINE__);
         gen(node->lhs);
+        printf("# return at %d\n", __LINE__);
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
@@ -197,11 +210,12 @@ void gen(Node *node) {
         gen(node->lhs);
         gen(node->rhs);
         return;
-    case ND_ADDR:
+    case ND_ADDR: // '&'
         // TODO: can't process &(x+1)
         gen_lval(node->lhs);
         return;
-    case ND_DEREF:
+    case ND_DEREF: // '*'
+        printf("# deref at %d\n", __LINE__);
         gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
