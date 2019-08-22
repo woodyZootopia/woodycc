@@ -8,7 +8,6 @@ wdcc: $(OBJS)
 $(OBJS): wdcc.h
 
 test: wdcc
-	./wdcc -test
 	./test.sh
 
 format:

@@ -8,11 +8,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (!strcmp(argv[1], "-test")) {
-        runtest();
-        return 0;
-    }
-
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
 
