@@ -19,7 +19,7 @@ typedef enum {
 } TokenKind;
 
 typedef struct {
-    TokenKind ty;         // token type
+    TokenKind ty;   // token type
     int val;        // if ty is TK_NUM or less, the value of it
     char name[100]; // if ty is TK_LVAR/TK_FUNC
     char *input;    // token character list for debugging
@@ -43,22 +43,10 @@ typedef enum {
     ND_RETURN,    // return
 } NodeKind;
 
-typedef struct Node {
-    NodeKind ty;      // must be set to some value
-    struct Node *lhs; // left-hand side
-    struct Node *rhs; // right-hand side
-    int val; // for ND_NUM or less. for argument of function, the depth of the
-             // argument node
-    char func_name[100]; // for ND_FUNC
-    int offset;          // offset of variable
-} Node;
-
-extern Node *code[100];
-
 typedef struct Type {
-    enum {INT, PTR} ty;
+    enum { INT, PTR } ty;
     struct Type *ptr_to;
-}Type;
+} Type;
 
 typedef struct LVar {
     // singly-linked list of local variables
@@ -66,8 +54,21 @@ typedef struct LVar {
     char *name;        // name of the local variable
     int len;           // length of the name
     int offset;        // offset from RBP
-    Type *type;  // type of the variable
+    Type *type;        // type of the variable
 } LVar;
+
+typedef struct Node {
+    NodeKind ty;      // must be set to some value
+    struct Node *lhs; // left-hand side
+    struct Node *rhs; // right-hand side
+    int val; // for ND_NUM or less. for argument of function, the depth of the
+             // argument node
+    char func_name[100];  // for ND_FUNC
+    int offset;           // offset of variable
+    LVar *lvar; // if ty==ND_LVAR,  pointer to corresponding lvar
+} Node;
+
+extern Node *code[100];
 
 extern LVar *locals;
 

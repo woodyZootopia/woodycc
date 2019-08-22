@@ -158,14 +158,16 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
     LVar *lvar = find_lvar(tok);
     if (lvar) {
         node->offset = lvar->offset;
+        node->lvar = lvar;
     } else {
         if (!declaration) {
             error2("The variable is not declared:%s", pos - 1);
         }
         lvar = calloc(1, sizeof(LVar));
-        lvar->next = locals;
+        lvar->next = locals; // link
         lvar->name = tok->name;
         lvar->len = tok->len;
+        node->lvar = lvar;
         if (pointer_depth != 0) {
             lvar->type = malloc(sizeof(Type));
             lvar->type->ty = PTR;

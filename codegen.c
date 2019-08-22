@@ -231,6 +231,16 @@ void gen(Node *node) {
     printf("    pop rdi\n");
     printf("    pop rax\n");
 
+    if (node->ty == '+' || node->ty == '-') {
+        if (node->lhs->lvar != NULL && node->lhs->lvar->type->ty == PTR) { // if lhs is pointer
+            if (node->lhs->lvar->type->ptr_to->ty == INT) { // if lhs is pointer to int
+                printf("    imul rdi, 4\n");
+            } else { // if lhs is pointer to pointer
+                printf("    imul rdi, 8\n");
+            }
+        }
+    }
+
     switch (node->ty) {
     case '+':
         printf("    add rax, rdi\n");
