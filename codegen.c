@@ -124,7 +124,8 @@ void gen(Node *node) {
             printf("%s:\n", node->func_name);
             printf("    push rbp\n");
             printf("    mov rbp, rsp\n");
-            printf("    sub rsp, 208\n"); // 208=26*8 bytes allocated
+            printf("    sub rsp, %d\n",
+                   locals->offset); // `offset` bytes allocated
             if (node->lhs != NULL) {
                 gen_arg(node->lhs);
             }
