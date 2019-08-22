@@ -85,6 +85,14 @@ void tokenize(char *p) {
             continue;
         }
 
+        if (!strncmp("sizeof", p, 6)) {
+            tokens[i].ty = TK_SIZEOF;
+            tokens[i].input = p;
+            i++;
+            p += 6;
+            continue;
+        }
+
         if (*p >= 'a' && *p <= 'z') {
             char *tmp;
             int j = 0;
@@ -392,6 +400,28 @@ Node *term() {
         pos++;
         Node *lhs = term();
         return new_node(ND_DEREF, lhs, NULL);
+    }
+    if (tokens[pos].ty == TK_SIZEOF) {
+        pos++;
+        Node *node = term();
+        if (node->ty == ND_NUM) { // node is number
+            return new_node_num(4);
+        } else if (node->ty == '+' || node->ty == '-') {
+            // CLEAN: redundant code
+            if (node->lhs->lvar->type->ty ==
+                INT) { // node is arithmetic and lhs is number
+                return new_node_num(4);
+            } else if (node->lhs->lvar->type->ty ==
+                       PTR) { // node is arithmetic and lhs is pointer
+                return new_node_num(8);
+            }
+        } else if (node->lvar->type->ty == INT) { // node is int variable
+            return new_node_num(4);
+        } else if (node->lvar->type->ty == PTR) { // node is pointer variable
+            return new_node_num(8);
+        } else {
+            error2("The argument to sizeof is uninterpretable:%s", pos);
+        }
     }
     error2("The token is uninterpretable:%s", pos);
 }

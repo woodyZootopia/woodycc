@@ -86,4 +86,15 @@ try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 1; return *q;}" 
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q;}" 4 foo.o
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 3; return *q;}" 8 foo.o
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 3; q = q - 1; return *q;}" 4 foo.o
+
+# sizeof operator
+echo "LINENO:$LINENO"
+# // TODO: when using sizeof operator in return, somehow 1 more character is parsed. needs to be fixed.
+try "int main(){return sizeof 3;}" 4
+try "int main(){return sizeof(3);}" 4
+try "int main(){int a; return sizeof a;}" 4
+try "int main(){return sizeof(3)+4;}" 8
+try "int main(){int a; a = sizeof(3); return a;}" 4
+try "int main(){int *a; return sizeof a;}" 8
+
 echo PASSED ALL TESTS!
