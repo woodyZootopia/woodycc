@@ -78,7 +78,7 @@ try "int main(){int foo; int bar; foo=2;bar=3; return foo+bar;}" 5
 
 # test pointer
 echo "LINENO:$LINENO"
-try "int main(){int x; int y; x=3; y=&x; return *y;}" 3
+try "int main(){int x; int *y; x=3; y=&x; return *y;}" 3
 try "int main(){int x; int *y; y=&x; *y=3; return x;}" 3
 # pointer arithmetic
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p; return *q;}" 1 foo.o
