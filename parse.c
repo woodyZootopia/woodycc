@@ -160,6 +160,11 @@ LVar *find_lvar(Token *tok) {
 }
 
 Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
+    // if declaration is
+    // 0: not declaration
+    // 1: declaration
+    // more than 1: declaration of an array, declaration being the length of the
+    // array
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
@@ -175,11 +180,20 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
         lvar->name = tok->name;
         lvar->len = tok->len;
         node->lvar = lvar;
-        if (pointer_depth != 0) {
+        if (declaration > 1) { // array to int
+            lvar->type = malloc(sizeof(Type));
+            lvar->type->ty = ARRAY;
+            Type *p = malloc(sizeof(Type));
+            lvar->type->ptr_to = p;
+            p->ty = INT;
+            lvar->type->array_size = declaration;
+            lvar->offset = locals->offset + 8 * declaration;
+        } else if (pointer_depth != 0) { // pointer
             lvar->type = malloc(sizeof(Type));
             lvar->type->ty = PTR;
             Type *p = malloc(sizeof(Type));
             lvar->type->ptr_to = p;
+            lvar->offset = locals->offset + 8;
             pointer_depth--;
             Type *pbefore = p;
             for (; pointer_depth >= 0; pointer_depth--) {
@@ -190,12 +204,13 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
                 }
                 p->ty = PTR;
                 p->ptr_to = pbefore;
+                pbefore = p;
             }
-        } else {
+        } else { // int
             lvar->type = malloc(sizeof(Type));
             lvar->type->ty = INT;
+            lvar->offset = locals->offset + 8;
         }
-        lvar->offset = locals->offset + 8;
         locals = lvar;
     }
     return node;
@@ -368,10 +383,11 @@ Node *term() {
         }
         if (tokens[pos + 1].ty == TK_LVAR) {
             pos++;
-            if (tokens[pos+1].ty == '[') { // array definition
-                Node *node = new_node_lvar(&tokens[pos++], 1, 1); // variable is pointer to int
-                node->lvar->type->array_size = tokens[++pos].val;
-                pos+=2;
+            if (tokens[pos + 1].ty ==
+                '[') { // array definition; only accepts number immediate
+                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
+                                           1); // variable is pointer to int
+                pos += 4;
                 return node;
             } else {
                 Node *node = new_node_lvar(&tokens[pos++], 1, 0);
@@ -412,9 +428,10 @@ Node *term() {
         Node *node = term();
         if (node->ty == ND_NUM) { // node is number
             return new_node_num(4);
-        } else if (node->ty == '+' || node->ty == '-') {
-            // CLEAN: redundant code
-            if (node->lhs->lvar->type->ty ==
+        } else if (node->ty == '+' ||
+                   node->ty == '-') { // CLEAN: redundant code
+            Node *tmp = node->lhs;
+            if (tmp->lvar->type->ty ==
                 INT) { // node is arithmetic and lhs is number
                 return new_node_num(4);
             } else if (node->lhs->lvar->type->ty ==
@@ -425,6 +442,8 @@ Node *term() {
             return new_node_num(4);
         } else if (node->lvar->type->ty == PTR) { // node is pointer variable
             return new_node_num(8);
+        } else if (node->lvar->type->ty == ARRAY) { // node is array variable
+            return new_node_num(4*node->lvar->type->array_size);
         } else {
             error2("The argument to sizeof is uninterpretable:%s", pos);
         }

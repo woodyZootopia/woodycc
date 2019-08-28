@@ -18,8 +18,7 @@ try() {
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
-        echo "$input
-$expected"
+        echo "$input: $expected"
     else
         echo "ERROR: \"$input\" expects $expected, but got $actual"
         exit 1
@@ -81,6 +80,7 @@ echo "LINENO:$LINENO"
 try "int main(){int x; int *y; x=3; y=&x; return *y;}" 3
 try "int main(){int x; int *y; y=&x; *y=3; return x;}" 3
 # pointer arithmetic
+# in the arithmetics, pointer should be lhs
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p; return *q;}" 1 foo.o
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 1; return *q;}" 2 foo.o
 try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q;}" 4 foo.o
@@ -100,5 +100,6 @@ try "int main(){int *a; return sizeof a;}" 8
 # array
 echo "LINENO:$LINENO"
 try "int main(){int a[10]; return 0;}" 0
+try "int main(){int a[10]; return sizeof(a);}" 40
 
 echo PASSED ALL TESTS!
