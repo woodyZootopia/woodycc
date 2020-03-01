@@ -1,5 +1,6 @@
 #include "wdcc.h"
 
+// TODO: align 16 bits for ABI proportionate call
 int jump_num = 2;
 
 void gen_lval(Node *node) {
@@ -254,6 +255,8 @@ void gen(Node *node) {
     case '/':
         printf("    mov rdx, 0\n");
         printf("    div rdi\n");
+        break;
+    default:
         break;
     }
     printf("    push rax\n");
