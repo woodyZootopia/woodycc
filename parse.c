@@ -154,7 +154,8 @@ LVar *find_lvar_from_locals(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
+Node *new_node_lvar(Token *tok, int declaration, int pointer_depth,
+                    int is_global_declaration) {
     // if declaration is
     // 0: not declaration
     // 1: declaration
@@ -372,13 +373,13 @@ Node *term() {
     }
     if (tokens[pos].ty == TK_LVAR) {
         if (tokens[pos + 1].ty == '[') {
-            Node *base = new_node_lvar(&tokens[pos], 0, 1);
+            Node *base = new_node_lvar(&tokens[pos], 0, 1, 0);
             pos += 2;
             Node *offset = term();
             pos += 1;
             return new_node(ND_DEREF, new_node('+', base, offset), NULL);
         } else {
-            return new_node_lvar(&tokens[pos++], 0, 0);
+            return new_node_lvar(&tokens[pos++], 0, 0, 0);
         }
     }
     if (tokens[pos].ty == TK_TYPE) {
@@ -390,12 +391,12 @@ Node *term() {
             pos++;
             if (tokens[pos + 1].ty ==
                 '[') { // array definition; only accepts number immediate
-                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
-                                           1); // variable is pointer to int
+                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val, 1,
+                                           0); // variable is pointer to int
                 pos += 4;
                 return node;
             } else {
-                Node *node = new_node_lvar(&tokens[pos++], 1, 0);
+                Node *node = new_node_lvar(&tokens[pos++], 1, 0, 0);
                 return node;
             }
         }
@@ -404,7 +405,7 @@ Node *term() {
             while (tokens[++pos].ty == '*') {
                 j++;
             }
-            return new_node_lvar(&tokens[pos++], 1, j);
+            return new_node_lvar(&tokens[pos++], 1, j, 0);
         }
         error2("int declaration is followed by something other than function "
                "or variable",
