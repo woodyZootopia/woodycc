@@ -146,7 +146,7 @@ Node *new_node_num(int val) {
     return node;
 }
 
-LVar *find_lvar(Token *tok) {
+LVar *find_lvar_from_locals(Token *tok) {
     for (LVar *var = locals; var; var = var->prev) {
         if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
             return var;
@@ -163,7 +163,7 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
-    LVar *lvar = find_lvar(tok);
+    LVar *lvar = find_lvar_from_locals(tok);
     if (lvar) { // already used
         node->lvar = lvar;
     } else { // newly used

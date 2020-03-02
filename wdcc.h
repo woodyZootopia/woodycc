@@ -87,7 +87,7 @@ typedef struct {
 // prototype declaration
 void tokenize(char *p);
 
-LVar *find_lvar(Token *tok);
+LVar *find_lvar_from_locals(Token *tok);
 
 Node *assign();
 Node *assign_prime();
