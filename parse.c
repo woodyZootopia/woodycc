@@ -95,16 +95,11 @@ void tokenize(char *p) {
 
         if (*p >= 'a' && *p <= 'z') {
             char *tmp;
-            int j = 0;
-            int k = 0;
+            int name_len = 0;
             for (tmp = p; isalnum(*tmp); tmp++)
                 // while following character is alnum...
-                j++;
-            k = j;
-            for (tmp = p; isalnum(*tmp) || *tmp == ' '; tmp++)
-                // while following character is alnum or space...
-                k++;
-            if (k >= 100)
+                name_len++;
+            if (name_len >= 100)
                 error2("function/variable name longer than 100 character", i);
             if (*tmp == '(') {
                 // if the word is followed by '(', it's a function
@@ -113,9 +108,9 @@ void tokenize(char *p) {
                 tokens[i].ty = TK_LVAR;
             }
             tokens[i].input = p;
-            strncpy(tokens[i].name, p, j);
-            tokens[i].name[j] = 0; // EOF
-            tokens[i].len = j;
+            strncpy(tokens[i].name, p, name_len);
+            tokens[i].name[name_len] = 0; // EOF
+            tokens[i].len = name_len;
             p = tmp;
             i++;
             continue;
