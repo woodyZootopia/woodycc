@@ -428,16 +428,6 @@ Node *term() {
         Node *node = term();
         if (node->ty == ND_NUM) { // node is number
             return new_node_num(4);
-        } else if (node->ty == '+' ||
-                   node->ty == '-') { // CLEAN: redundant code
-            Node *tmp = node->lhs;
-            if (tmp->lvar->type->ty ==
-                INT) { // node is arithmetic and lhs is number
-                return new_node_num(4);
-            } else if (node->lhs->lvar->type->ty ==
-                       PTR) { // node is arithmetic and lhs is pointer
-                return new_node_num(8);
-            }
         } else if (node->lvar->type->ty == INT) { // node is int variable
             return new_node_num(4);
         } else if (node->lvar->type->ty == PTR) { // node is pointer variable
