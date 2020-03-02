@@ -163,8 +163,8 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth) {
     // if declaration is
     // 0: not declaration
     // 1: declaration
-    // more than 1: declaration of an array, declaration being the length of the
-    // array
+    // more than 1: declaration of an array, the value of `declaration` being
+    // the length of the array
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     // TODO: only expects one character variable
@@ -372,10 +372,20 @@ Node *term() {
         Node *rhs = paragraph();
         return new_node_func(func_name, lhs, rhs);
     }
-    if (tokens[pos].ty == TK_NUM)
+    if (tokens[pos].ty == TK_NUM) {
         return new_node_num(tokens[pos++].val);
-    if (tokens[pos].ty == TK_LVAR)
-        return new_node_lvar(&tokens[pos++], 0, 0);
+    }
+    if (tokens[pos].ty == TK_LVAR) {
+        if (tokens[pos + 1].ty == '[') {
+            Node *base = new_node_lvar(&tokens[pos], 0, 1);
+            pos += 2;
+            Node *offset = term();
+            pos += 1;
+            return new_node(ND_DEREF, new_node('+', base, offset), NULL);
+        } else {
+            return new_node_lvar(&tokens[pos++], 0, 0);
+        }
+    }
     if (tokens[pos].ty == TK_TYPE) {
         if (tokens[pos + 1].ty == TK_FUNC) {
             pos++;

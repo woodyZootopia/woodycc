@@ -25,6 +25,8 @@ try() {
     fi
 }
 
+make
+
 # return value should be less than 256
 # tests basic arithmetics
 echo "LINENO:$LINENO"
@@ -101,5 +103,9 @@ try "int main(){int *a; return sizeof a;}" 8
 echo "LINENO:$LINENO"
 try "int main(){int a[10]; return 0;}" 0
 try "int main(){int a[10]; return sizeof(a);}" 40
+try "int main(){int a[10]; *a = 1; return *a;}" 1
+try "int main(){int a[10]; *a = 1; *(a+3)=2; return *a+*(a+3);}" 3
+try "int main(){int a[10]; a[3]=2; return a[3];}" 2
+try "int main(){int a[10]; int b=3; a[b]=3; return a[b];}" 3
 
 echo PASSED ALL TESTS!
