@@ -154,12 +154,12 @@ LVar *find_lvar_from_locals(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok, int declaration, int pointer_depth,
+Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
                     int is_global_declaration) {
-    // if declaration is
+    // if declaration_type is
     // 0: not declaration
     // 1: declaration
-    // more than 1: declaration of an array, the value of `declaration` being
+    // bigger than 1: declaration of an array, the value of `declaration_type` being
     // the length of the array
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
@@ -168,7 +168,7 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth,
     if (lvar) { // already used
         node->lvar = lvar;
     } else { // newly used
-        if (!declaration) {
+        if (!declaration_type) {
             error2("The variable is not declared:%s", pos - 1);
         }
         lvar = calloc(1, sizeof(LVar));
@@ -176,14 +176,14 @@ Node *new_node_lvar(Token *tok, int declaration, int pointer_depth,
         lvar->name = tok->name;
         lvar->len = tok->len;
         node->lvar = lvar;
-        if (declaration > 1) { // array to int
+        if (declaration_type > 1) { // array to int
             lvar->type = malloc(sizeof(Type));
             lvar->type->ty = ARRAY;
             Type *p = malloc(sizeof(Type));
             lvar->type->ptr_to = p;
             p->ty = INT;
-            lvar->type->array_size = declaration;
-            lvar->offset = locals->offset + 8 * declaration;
+            lvar->type->array_size = declaration_type;
+            lvar->offset = locals->offset + 8 * declaration_type;
         } else if (pointer_depth != 0) { // pointer
             lvar->type = malloc(sizeof(Type));
             lvar->type->ty = PTR;
