@@ -373,7 +373,8 @@ Node *term() {
     }
     if (tokens[pos].ty == TK_LVAR) {
         if (tokens[pos + 1].ty == '[') {
-            Node *base = new_node_lvar(&tokens[pos], 0, 1, 0);
+            Node *base = new_node_lvar(
+                &tokens[pos], 0, 1, 0); // TODO(optional): implement to allow 3[a] notation
             pos += 2;
             Node *offset = term();
             pos += 1;
