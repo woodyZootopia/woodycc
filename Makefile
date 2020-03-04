@@ -1,6 +1,7 @@
 CFLAGS=-g -std=c11 -Wall
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
+CC=cc
 
 wdcc: $(OBJS)
 	$(CC) -g -o wdcc $(OBJS) $(LDFLAGS)
@@ -8,7 +9,7 @@ wdcc: $(OBJS)
 $(OBJS): wdcc.h
 
 test: wdcc
-	./test.sh
+	bash test.sh
 
 format:
 	clang-format -i $(SRCS)
