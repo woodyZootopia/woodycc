@@ -184,15 +184,17 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
             error2("The variable is not declared:%s", pos - 1);
         }
         VarBlock *var;
-        if (!lvar) {
-            var = lvar;
+        if (is_in_function) {
             node->ty = ND_LOC_VAR;
+            var = lvar;
+            var = calloc(1, sizeof(VarBlock));
+            var->prev = locals; // link
         } else {
-            var = gvar;
             node->ty = ND_GLO_VAR;
+            var = gvar;
+            var = calloc(1, sizeof(VarBlock));
+            var->prev = locals; // link
         }
-        var = calloc(1, sizeof(VarBlock));
-        var->prev = locals; // link
         var->name = tok->name;
         var->len = tok->len;
         node->var = var;
@@ -305,7 +307,7 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
-        if (!(lhs->ty == ND_LOC_VAR || lhs->ty == ND_DEREF)) {
+        if (!(lhs->ty == ND_LOC_VAR  || lhs->ty == ND_GLO_VAR || lhs->ty == ND_DEREF)) {
             error2("left hand side of assignment is not identifier:", pos);
         }
         pos++;
@@ -372,7 +374,9 @@ Node *term() {
             lhs = NULL;
         } else {
             pos += 2;
+            is_in_function = 1;
             lhs = argument();
+            is_in_function = 0;
             pos++;
             int j = 0;
             // mark ',' with depth from function to determine the register to

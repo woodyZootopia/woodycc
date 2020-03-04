@@ -87,11 +87,11 @@ try "int main(){int x; int *y; x=3; y=&x; return *y;}" 3
 try "int main(){int x; int *y; y=&x; *y=3; return x;}" 3
 # pointer arithmetic
 # in the arithmetics, pointer should be lhs
-try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p; return *q;}" 1 foo.o
-try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 1; return *q;}" 2 foo.o
-try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 2; return *q;}" 4 foo.o
-try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 3; return *q;}" 8 foo.o
-try "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q = p + 3; q = q - 1; return *q;}" 4 foo.o
+try "int main(){int *p; int *q; alloc4(&p, 1, 2, 4, 8); q = p; return *q;}" 1 foo.o
+try "int main(){int *p; int *q; alloc4(&p, 1, 2, 4, 8); q = p + 1; return *q;}" 2 foo.o
+try "int main(){int *p; int *q; alloc4(&p, 1, 2, 4, 8); q = p + 2; return *q;}" 4 foo.o
+try "int main(){int *p; int *q; alloc4(&p, 1, 2, 4, 8); q = p + 3; return *q;}" 8 foo.o
+try "int main(){int *p; int *q; alloc4(&p, 1, 2, 4, 8); q = p + 3; q = q - 1; return *q;}" 4 foo.o
 
 # sizeof operator
 echo "LINENO:$LINENO"
