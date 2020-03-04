@@ -26,6 +26,10 @@ try() {
 }
 
 make
+if [ $? != 0 ]; then
+    echo "ERROR: compile error of the source"
+    exit 1
+fi
 
 # return value should be less than 256
 # tests basic arithmetics
