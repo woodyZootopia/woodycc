@@ -2,6 +2,8 @@
 
 Token tokens[100];
 
+int is_in_function = 0;
+
 void error(int i) {
     fprintf(stderr, "Unexpected token:%s\n", tokens[i].input);
     exit(1);
@@ -162,8 +164,7 @@ VarBlock *find_lvar_from_globals(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
-                    int is_global_declaration) {
+Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
     // if declaration_type is
     // 0: not declaration
     // 1: declaration
@@ -173,15 +174,9 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
     VarBlock *lvar = find_lvar_from_locals(tok);
     VarBlock *gvar = find_lvar_from_globals(tok);
     if (lvar) { // already declared
-        if(declaration_type){
-            error2("The variable is already declared:%s", pos - 1);
-        }
         node->var = lvar;
         node->ty = ND_LOC_VAR;
     } else if (gvar) { // already declared as global
-        if(declaration_type){
-            error2("The variable is already declared:%s", pos - 1);
-        }
         node->var = gvar;
         node->ty = ND_GLO_VAR;
     } else { // newly declared
@@ -189,15 +184,17 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
             error2("The variable is not declared:%s", pos - 1);
         }
         VarBlock *var;
-        if (!lvar) {
-            var = lvar;
+        if (is_in_function) {
             node->ty = ND_LOC_VAR;
+            var = lvar;
+            var = calloc(1, sizeof(VarBlock));
+            var->prev = locals; // link
         } else {
-            var = gvar;
             node->ty = ND_GLO_VAR;
+            var = gvar;
+            var = calloc(1, sizeof(VarBlock));
+            var->prev = locals; // link
         }
-        var = calloc(1, sizeof(VarBlock));
-        var->prev = locals; // link
         var->name = tok->name;
         var->len = tok->len;
         node->var = var;
@@ -310,7 +307,7 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
-        if (!(lhs->ty == ND_LOC_VAR || lhs->ty == ND_DEREF)) {
+        if (!(lhs->ty == ND_LOC_VAR  || lhs->ty == ND_GLO_VAR || lhs->ty == ND_DEREF)) {
             error2("left hand side of assignment is not identifier:", pos);
         }
         pos++;
@@ -377,7 +374,9 @@ Node *term() {
             lhs = NULL;
         } else {
             pos += 2;
+            is_in_function = 1;
             lhs = argument();
+            is_in_function = 0;
             pos++;
             int j = 0;
             // mark ',' with depth from function to determine the register to
@@ -390,7 +389,9 @@ Node *term() {
         if (tokens[pos].ty != '{') {
             return new_node_func(func_name, lhs, NULL);
         }
+        is_in_function = 1;
         Node *rhs = paragraph();
+        is_in_function = 0;
         return new_node_func(func_name, lhs, rhs);
     }
     if (tokens[pos].ty == TK_NUM) {
@@ -399,14 +400,14 @@ Node *term() {
     if (tokens[pos].ty == TK_LVAR) {
         if (tokens[pos + 1].ty == '[') {
             Node *base = new_node_lvar(
-                &tokens[pos], 0, 1,
-                0); // TODO(optional): implement to allow 3[a] notation
+                &tokens[pos], 0,
+                1); // TODO(optional): implement to allow 3[a] notation
             pos += 2;
             Node *offset = term();
             pos += 1;
             return new_node(ND_DEREF, new_node('+', base, offset), NULL);
         } else {
-            return new_node_lvar(&tokens[pos++], 0, 0, 0);
+            return new_node_lvar(&tokens[pos++], 0, 0);
         }
     }
     if (tokens[pos].ty == TK_TYPE) {
@@ -418,12 +419,12 @@ Node *term() {
             pos++;
             if (tokens[pos + 1].ty ==
                 '[') { // array definition; only accepts number immediate
-                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val, 1,
-                                           0); // variable is pointer to int
+                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
+                                           1); // variable is pointer to int
                 pos += 4;
                 return node;
             } else {
-                Node *node = new_node_lvar(&tokens[pos++], 1, 0, 0);
+                Node *node = new_node_lvar(&tokens[pos++], 1, 0);
                 return node;
             }
         }
@@ -432,7 +433,7 @@ Node *term() {
             while (tokens[++pos].ty == '*') {
                 j++;
             }
-            return new_node_lvar(&tokens[pos++], 1, j, 0);
+            return new_node_lvar(&tokens[pos++], 1, j);
         }
         error2("int declaration is followed by something other than function "
                "or variable",

@@ -4,7 +4,7 @@
 int jump_num = 2;
 
 void gen_lval(Node *node) {
-    if (node->ty != ND_LOC_VAR) {
+    if (!(node->ty == ND_LOC_VAR || node->ty == ND_GLO_VAR)) {
         error2("left hand side is not a variable", 0);
     }
 
@@ -74,19 +74,17 @@ void gen(Node *node) {
         printf("    push %d\n", node->val);
         return;
     case ND_LOC_VAR:
-    case ND_GLO_VAR://TODO: treat global value differently
-        if (node->var != NULL){
-            printf("# generate local lhs at %d\n", __LINE__);
-            gen_lval(node);
-            printf("    pop rax\n");
-            printf("    mov rax, [rax]\n");
-            printf("    push rax\n");
-        }else{
-            printf("# generate global lhs at %d\n", __LINE__);
-            printf("%s:", node->var->name);
-            printf("    .zero %d", 4*node->var->len);
-                //TODO: implement this; needs the info of array length
-        }
+        printf("# generate local lhs at %d\n", __LINE__);
+        gen_lval(node);
+        printf("    pop rax\n");
+        printf("    mov rax, [rax]\n");
+        printf("    push rax\n");
+        return;
+    case ND_GLO_VAR: // TODO: treat global value differently
+        printf("# generate global lhs at %d\n", __LINE__);
+        printf("%s:", node->var->name);
+        printf("    .zero %d\n", 4 * node->var->len);
+        // TODO: implement this; needs the info of array length
         return;
     case '=':
         printf("# assignment at %d\n", __LINE__);
@@ -241,8 +239,10 @@ void gen(Node *node) {
     printf("    pop rax\n");
 
     if (node->ty == '+' || node->ty == '-') {
-        if (node->lhs->var != NULL && node->lhs->var->type->ty == PTR) { // if lhs is pointer
-            if (node->lhs->var->type->ptr_to->ty == INT) { // if lhs is pointer to int
+        if (node->lhs->var != NULL &&
+            node->lhs->var->type->ty == PTR) { // if lhs is pointer
+            if (node->lhs->var->type->ptr_to->ty ==
+                INT) { // if lhs is pointer to int
                 printf("    imul rdi, 4\n");
             } else { // if lhs is pointer to pointer
                 printf("    imul rdi, 8\n");
