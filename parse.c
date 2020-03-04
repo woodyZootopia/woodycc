@@ -173,9 +173,15 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
     VarBlock *lvar = find_lvar_from_locals(tok);
     VarBlock *gvar = find_lvar_from_globals(tok);
     if (lvar) { // already declared
+        if(declaration_type){
+            error2("The variable is already declared:%s", pos - 1);
+        }
         node->var = lvar;
         node->ty = ND_LOC_VAR;
     } else if (gvar) { // already declared as global
+        if(declaration_type){
+            error2("The variable is already declared:%s", pos - 1);
+        }
         node->var = gvar;
         node->ty = ND_GLO_VAR;
     } else { // newly declared
