@@ -112,4 +112,8 @@ try "int main(){int a[10]; *a = 1; *(a+3)=2; return *a+*(a+3);}" 3
 try "int main(){int a[10]; a[3]=2; return a[3];}" 2
 try "int main(){int a[10]; int b=3; a[b]=3; return a[b];}" 3
 
+# global variable
+echo "LINENO:$LINENO"
+try "int a; main(){a=32; return a;}" 32
+
 echo PASSED ALL TESTS!

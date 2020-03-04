@@ -146,8 +146,16 @@ Node *new_node_num(int val) {
     return node;
 }
 
-LVar *find_lvar_from_locals(Token *tok) {
-    for (LVar *var = locals; var; var = var->prev) {
+VarBlock *find_lvar_from_locals(Token *tok) {
+    for (VarBlock *var = locals; var; var = var->prev) {
+        if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
+            return var;
+    }
+    return NULL;
+}
+
+VarBlock *find_lvar_from_globals(Token *tok) {
+    for (VarBlock *var = globals; var; var = var->prev) {
         if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
             return var;
     }
@@ -159,40 +167,48 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
     // if declaration_type is
     // 0: not declaration
     // 1: declaration
-    // bigger than 1: declaration of an array, the value of `declaration_type` being
-    // the length of the array
+    // bigger than 1: declaration of an array, the value of `declaration_type`
+    // being the length of the array
     Node *node = malloc(sizeof(Node));
-    node->ty = ND_LVAR;
-    // TODO: only expects one character variable
-    LVar *lvar = find_lvar_from_locals(tok);
-    if (lvar) { // already used
-        if(declaration_type){
-            error2("The variable is already declared:%s", pos - 1);
-        }
-        node->lvar = lvar;
-    } else { // newly used
+    VarBlock *lvar = find_lvar_from_locals(tok);
+    VarBlock *gvar = find_lvar_from_globals(tok);
+    if (lvar) { // already declared
+        node->var = lvar;
+        node->ty = ND_LOC_VAR;
+    } else if (gvar) { // already declared as global
+        node->var = gvar;
+        node->ty = ND_GLO_VAR;
+    } else { // newly declared
         if (!declaration_type) {
             error2("The variable is not declared:%s", pos - 1);
         }
-        lvar = calloc(1, sizeof(LVar));
-        lvar->prev = locals; // link
-        lvar->name = tok->name;
-        lvar->len = tok->len;
-        node->lvar = lvar;
+        VarBlock *var;
+        if (!lvar) {
+            var = lvar;
+            node->ty = ND_LOC_VAR;
+        } else {
+            var = gvar;
+            node->ty = ND_GLO_VAR;
+        }
+        var = calloc(1, sizeof(VarBlock));
+        var->prev = locals; // link
+        var->name = tok->name;
+        var->len = tok->len;
+        node->var = var;
         if (declaration_type > 1) { // array to int
-            lvar->type = malloc(sizeof(Type));
-            lvar->type->ty = ARRAY;
+            var->type = malloc(sizeof(Type));
+            var->type->ty = ARRAY;
             Type *p = malloc(sizeof(Type));
-            lvar->type->ptr_to = p;
+            var->type->ptr_to = p;
             p->ty = INT;
-            lvar->type->array_size = declaration_type;
-            lvar->offset = locals->offset + 8 * declaration_type;
+            var->type->array_size = declaration_type;
+            var->offset = locals->offset + 8 * declaration_type;
         } else if (pointer_depth != 0) { // pointer
-            lvar->type = malloc(sizeof(Type));
-            lvar->type->ty = PTR;
+            var->type = malloc(sizeof(Type));
+            var->type->ty = PTR;
             Type *p = malloc(sizeof(Type));
-            lvar->type->ptr_to = p;
-            lvar->offset = locals->offset + 8;
+            var->type->ptr_to = p;
+            var->offset = locals->offset + 8;
             pointer_depth--;
             Type *pbefore = p;
             for (; pointer_depth >= 0; pointer_depth--) {
@@ -206,11 +222,11 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
                 pbefore = p;
             }
         } else { // int
-            lvar->type = malloc(sizeof(Type));
-            lvar->type->ty = INT;
-            lvar->offset = locals->offset + 8;
+            var->type = malloc(sizeof(Type));
+            var->type->ty = INT;
+            var->offset = locals->offset + 8;
         }
-        locals = lvar;
+        locals = var;
     }
     return node;
 }
@@ -288,7 +304,7 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
-        if (!(lhs->ty == ND_LVAR || lhs->ty == ND_DEREF)) {
+        if (!(lhs->ty == ND_LOC_VAR || lhs->ty == ND_DEREF)) {
             error2("left hand side of assignment is not identifier:", pos);
         }
         pos++;
@@ -377,7 +393,8 @@ Node *term() {
     if (tokens[pos].ty == TK_LVAR) {
         if (tokens[pos + 1].ty == '[') {
             Node *base = new_node_lvar(
-                &tokens[pos], 0, 1, 0); // TODO(optional): implement to allow 3[a] notation
+                &tokens[pos], 0, 1,
+                0); // TODO(optional): implement to allow 3[a] notation
             pos += 2;
             Node *offset = term();
             pos += 1;
@@ -438,12 +455,12 @@ Node *term() {
         Node *node = term();
         if (node->ty == ND_NUM) { // node is number
             return new_node_num(4);
-        } else if (node->lvar->type->ty == INT) { // node is int variable
+        } else if (node->var->type->ty == INT) { // node is int variable
             return new_node_num(4);
-        } else if (node->lvar->type->ty == PTR) { // node is pointer variable
+        } else if (node->var->type->ty == PTR) { // node is pointer variable
             return new_node_num(8);
-        } else if (node->lvar->type->ty == ARRAY) { // node is array variable
-            return new_node_num(4*node->lvar->type->array_size);
+        } else if (node->var->type->ty == ARRAY) { // node is array variable
+            return new_node_num(4 * node->var->type->array_size);
         } else {
             error2("The argument to sizeof is uninterpretable:%s", pos);
         }

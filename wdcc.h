@@ -33,7 +33,8 @@ extern Token tokens[100];
 typedef enum {
     // 0 to 255 is reserved for some of one character operations, like = or +
     ND_NUM = 256, // integer
-    ND_LVAR,      // local variable
+    ND_LOC_VAR,      // local variable
+    ND_GLO_VAR,      // global variable
     ND_ADDR,      // & for &(local var)
     ND_DEREF,     // * for *(local var)
     ND_IF,        // if
@@ -50,14 +51,14 @@ typedef struct Type {
     size_t array_size;
 } Type;
 
-typedef struct LVar {
+typedef struct VarBlock {
     // singly-linked list of local variables
-    struct LVar *prev; // next local variable
+    struct VarBlock *prev; // next local variable
     char *name;        // name of the local variable
     int len;           // length of the name
     int offset;        // offset from RBP
     Type *type;        // type of the variable
-} LVar;
+} VarBlock;
 
 typedef struct Node {
     NodeKind ty;      // must be set to some value
@@ -66,12 +67,13 @@ typedef struct Node {
     int val; // for ND_NUM or less. for argument of function, the depth of the
              // argument node
     char func_name[100]; // for ND_FUNC
-    LVar *lvar;          // if ty==ND_LVAR,  pointer to corresponding lvar
+    VarBlock *var;          // pointer to the corresponding VarBlock
 } Node;
 
 extern Node *code[100];
 
-extern LVar *locals;
+extern VarBlock *locals;
+extern VarBlock *globals;
 
 typedef struct {
     void **data;
@@ -87,7 +89,7 @@ typedef struct {
 // prototype declaration
 void tokenize(char *p);
 
-LVar *find_lvar_from_locals(Token *tok);
+VarBlock *find_lvar_from_locals(Token *tok);
 
 Node *assign();
 Node *assign_prime();
