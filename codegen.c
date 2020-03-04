@@ -4,11 +4,11 @@
 int jump_num = 2;
 
 void gen_lval(Node *node) {
-    if (node->ty != ND_LVAR) {
+    if (node->ty != ND_LOC_VAR) {
         error2("left hand side is not a variable", 0);
     }
 
-    int offset = node->lvar->offset;
+    int offset = node->var->offset;
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
     printf("    push rax\n"); // now rax is the pointer to the variable
@@ -17,13 +17,13 @@ void gen_lval(Node *node) {
 void gen_arg(Node *node) {
     int depth = 0;
     Node *tmp;
-    if (node->ty == ND_LVAR) {
+    if (node->ty == ND_LOC_VAR) {
         gen_lval(node);
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
         return;
     }
-    for (tmp = node; tmp->ty != ND_LVAR; tmp = tmp->rhs) {
+    for (tmp = node; tmp->ty != ND_LOC_VAR; tmp = tmp->rhs) {
         gen_lval(tmp->lhs);
         printf("    pop rax\n");
         if (depth == 0) {
@@ -73,12 +73,20 @@ void gen(Node *node) {
         printf("# push immediate at %d\n", __LINE__);
         printf("    push %d\n", node->val);
         return;
-    case ND_LVAR:
-        printf("# generate lhs at %d\n", __LINE__);
-        gen_lval(node);
-        printf("    pop rax\n");
-        printf("    mov rax, [rax]\n");
-        printf("    push rax\n");
+    case ND_LOC_VAR:
+    case ND_GLO_VAR://TODO: treat global value differently
+        if (node->var != NULL){
+            printf("# generate local lhs at %d\n", __LINE__);
+            gen_lval(node);
+            printf("    pop rax\n");
+            printf("    mov rax, [rax]\n");
+            printf("    push rax\n");
+        }else{
+            printf("# generate global lhs at %d\n", __LINE__);
+            printf("%s:", node->var->name);
+            printf("    .zero %d", 4*node->var->len);
+                //TODO: implement this; needs the info of array length
+        }
         return;
     case '=':
         printf("# assignment at %d\n", __LINE__);
@@ -233,8 +241,8 @@ void gen(Node *node) {
     printf("    pop rax\n");
 
     if (node->ty == '+' || node->ty == '-') {
-        if (node->lhs->lvar != NULL && node->lhs->lvar->type->ty == PTR) { // if lhs is pointer
-            if (node->lhs->lvar->type->ptr_to->ty == INT) { // if lhs is pointer to int
+        if (node->lhs->var != NULL && node->lhs->var->type->ty == PTR) { // if lhs is pointer
+            if (node->lhs->var->type->ptr_to->ty == INT) { // if lhs is pointer to int
                 printf("    imul rdi, 4\n");
             } else { // if lhs is pointer to pointer
                 printf("    imul rdi, 8\n");
