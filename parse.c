@@ -2,6 +2,8 @@
 
 Token tokens[100];
 
+int is_in_function = 0;
+
 void error(int i) {
     fprintf(stderr, "Unexpected token:%s\n", tokens[i].input);
     exit(1);
@@ -162,8 +164,7 @@ VarBlock *find_lvar_from_globals(Token *tok) {
     return NULL;
 }
 
-Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
-                    int is_global_declaration) {
+Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
     // if declaration_type is
     // 0: not declaration
     // 1: declaration
@@ -384,7 +385,9 @@ Node *term() {
         if (tokens[pos].ty != '{') {
             return new_node_func(func_name, lhs, NULL);
         }
+        is_in_function = 1;
         Node *rhs = paragraph();
+        is_in_function = 0;
         return new_node_func(func_name, lhs, rhs);
     }
     if (tokens[pos].ty == TK_NUM) {
@@ -393,14 +396,14 @@ Node *term() {
     if (tokens[pos].ty == TK_LVAR) {
         if (tokens[pos + 1].ty == '[') {
             Node *base = new_node_lvar(
-                &tokens[pos], 0, 1,
-                0); // TODO(optional): implement to allow 3[a] notation
+                &tokens[pos], 0,
+                1); // TODO(optional): implement to allow 3[a] notation
             pos += 2;
             Node *offset = term();
             pos += 1;
             return new_node(ND_DEREF, new_node('+', base, offset), NULL);
         } else {
-            return new_node_lvar(&tokens[pos++], 0, 0, 0);
+            return new_node_lvar(&tokens[pos++], 0, 0);
         }
     }
     if (tokens[pos].ty == TK_TYPE) {
@@ -412,12 +415,12 @@ Node *term() {
             pos++;
             if (tokens[pos + 1].ty ==
                 '[') { // array definition; only accepts number immediate
-                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val, 1,
-                                           0); // variable is pointer to int
+                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
+                                           1); // variable is pointer to int
                 pos += 4;
                 return node;
             } else {
-                Node *node = new_node_lvar(&tokens[pos++], 1, 0, 0);
+                Node *node = new_node_lvar(&tokens[pos++], 1, 0);
                 return node;
             }
         }
@@ -426,7 +429,7 @@ Node *term() {
             while (tokens[++pos].ty == '*') {
                 j++;
             }
-            return new_node_lvar(&tokens[pos++], 1, j, 0);
+            return new_node_lvar(&tokens[pos++], 1, j);
         }
         error2("int declaration is followed by something other than function "
                "or variable",
