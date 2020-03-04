@@ -166,6 +166,9 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth,
     // TODO: only expects one character variable
     LVar *lvar = find_lvar_from_locals(tok);
     if (lvar) { // already used
+        if(declaration_type){
+            error2("The variable is already declared:%s", pos - 1);
+        }
         node->lvar = lvar;
     } else { // newly used
         if (!declaration_type) {
