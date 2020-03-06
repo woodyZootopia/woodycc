@@ -1,10 +1,13 @@
 #include "wdcc.h"
 
+#define PRINT_COMMENT_DEBUG
+
 // TODO: align 16 bits for ABI proportionate call
 int jump_num = 2;
 
 void gen_lval(Node *node) {
-    if (!(node->ty == ND_LOC_VAR || node->ty == ND_GLO_VAR)) {
+    /* if (!(node->ty == ND_LOC_VAR || node->ty == ND_GLO_VAR)) { */
+    if (!(node->ty == ND_LOC_VAR)) {
         error2("left hand side is not a variable", 0);
     }
 
@@ -80,7 +83,7 @@ void gen(Node *node) {
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
-    case ND_GLO_VAR: // TODO: treat global value differently
+    case ND_GLO_VAR:
         printf("# generate global lhs at %d\n", __LINE__);
         printf("%s:", node->var->name);
         printf("    .zero %d\n", 4 * node->var->len);
@@ -91,9 +94,15 @@ void gen(Node *node) {
         if (node->lhs->ty == ND_DEREF) {
             printf("# generate lhs (pointer dereference at %d)\n", __LINE__);
             gen(node->lhs->lhs);
-        } else {
+        } else if (node->lhs->ty == ND_LOC_VAR) {
             printf("# generate lhs at %d\n", __LINE__);
             gen_lval(node->lhs);
+        } else if (node->lhs->ty == ND_GLO_VAR) {
+            printf("# generate lhs (global) at %d\n");
+            printf("    mov %s, rax\n", node->lhs->var->name);
+            printf("    push rax\n");
+        } else {
+            error2("lhs of the assignment is not appropriate.", 0);
         }
         gen(node->rhs);
 
@@ -142,7 +151,7 @@ void gen(Node *node) {
             printf("    push rbp\n");
             printf("    mov rbp, rsp\n");
             printf("    sub rsp, %d\n",
-                   locals->offset); // `offset` bytes allocated
+                   node->var->offset); // allocate `offset` bytes
             if (node->lhs != NULL) {
                 printf("# argument assignment at %d\n", __LINE__);
                 gen_arg(node->lhs);
@@ -228,6 +237,16 @@ void gen(Node *node) {
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
+    case ND_DEF:
+        if(node->lhs->ty == ND_GLO_VAR){
+            printf("# generate global lhs at %d\n", __LINE__);
+            printf("%s:", node->var->name);
+            printf("    .zero %d\n", 4 * node->var->len);
+            // TODO: implement this; needs the info of array length
+            return;
+        } else if (node->lhs->ty == ND_LOC_VAR){
+            return;
+        }
     }
 
     // If none of the above, the node is polynomial

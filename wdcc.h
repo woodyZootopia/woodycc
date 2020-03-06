@@ -43,6 +43,7 @@ typedef enum {
     ND_WHILE,     // while
     ND_FUNC,      // function
     ND_RETURN,    // return
+    ND_DEF,
 } NodeKind;
 
 typedef struct Type {
@@ -53,8 +54,8 @@ typedef struct Type {
 
 typedef struct VarBlock {
     // singly-linked list of local variables
-    struct VarBlock *prev; // next local variable
-    char *name;        // name of the local variable
+    struct VarBlock *prev; // next variable
+    char *name;        // name of the variable
     int len;           // length of the name
     int offset;        // offset from RBP
     Type *type;        // type of the variable
@@ -72,7 +73,6 @@ typedef struct Node {
 
 extern Node *code[100];
 
-extern VarBlock *locals;
 extern VarBlock *globals;
 
 typedef struct {

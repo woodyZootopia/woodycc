@@ -1,10 +1,8 @@
 #include "wdcc.h"
 
-VarBlock *locals;
 VarBlock *globals;
 
 int main(int argc, char **argv) {
-    locals = malloc(sizeof(VarBlock));
     if (argc != 2) {
         return 1;
     }

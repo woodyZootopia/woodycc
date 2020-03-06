@@ -2,7 +2,7 @@
 
 Token tokens[100];
 
-int is_in_function = 0;
+VarBlock *current_locals = NULL;
 
 void error(int i) {
     fprintf(stderr, "Unexpected token:%s\n", tokens[i].input);
@@ -149,7 +149,7 @@ Node *new_node_num(int val) {
 }
 
 VarBlock *find_lvar_from_locals(Token *tok) {
-    for (VarBlock *var = locals; var; var = var->prev) {
+    for (VarBlock *var = current_locals; var; var = var->prev) {
         if (var->len == tok->len && !memcmp(tok->name, var->name, var->len))
             return var;
     }
@@ -184,16 +184,16 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
             error2("The variable is not declared:%s", pos - 1);
         }
         VarBlock *var;
-        if (is_in_function) {
+        if (current_locals) {
             node->ty = ND_LOC_VAR;
             var = lvar;
             var = calloc(1, sizeof(VarBlock));
-            var->prev = locals; // link
+            var->prev = current_locals; // link
         } else {
             node->ty = ND_GLO_VAR;
             var = gvar;
             var = calloc(1, sizeof(VarBlock));
-            var->prev = locals; // link
+            var->prev = globals; // link
         }
         var->name = tok->name;
         var->len = tok->len;
@@ -205,13 +205,13 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
             var->type->ptr_to = p;
             p->ty = INT;
             var->type->array_size = declaration_type;
-            var->offset = locals->offset + 8 * declaration_type;
+            var->offset = current_locals->offset + 8 * declaration_type;
         } else if (pointer_depth != 0) { // pointer
             var->type = malloc(sizeof(Type));
             var->type->ty = PTR;
             Type *p = malloc(sizeof(Type));
             var->type->ptr_to = p;
-            var->offset = locals->offset + 8;
+            var->offset = current_locals->offset + 8;
             pointer_depth--;
             Type *pbefore = p;
             for (; pointer_depth >= 0; pointer_depth--) {
@@ -227,18 +227,23 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
         } else { // int
             var->type = malloc(sizeof(Type));
             var->type->ty = INT;
-            var->offset = locals->offset + 8;
+            var->offset = current_locals->offset + 8;
         }
-        locals = var;
+        if (current_locals) {
+            current_locals = var;
+        } else {
+            globals = var;
+        }
     }
     return node;
 }
 
-Node *new_node_func(char name[], Node *lhs, Node *rhs) {
+Node *new_node_func(char name[], Node *lhs, Node *rhs, VarBlock *locals) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_FUNC;
     node->lhs = lhs;
     node->rhs = rhs;
+    node->var = locals;
     strcpy(node->func_name, name);
     return node;
 }
@@ -307,7 +312,8 @@ Node *assign() {
         return lhs;
     }
     if (tokens[pos].ty == '=') {
-        if (!(lhs->ty == ND_LOC_VAR  || lhs->ty == ND_GLO_VAR || lhs->ty == ND_DEREF)) {
+        if (!(lhs->ty == ND_LOC_VAR || lhs->ty == ND_GLO_VAR ||
+              lhs->ty == ND_DEREF)) {
             error2("left hand side of assignment is not identifier:", pos);
         }
         pos++;
@@ -369,14 +375,16 @@ Node *term() {
             error2("invalid function format.", pos);
         char *func_name = tokens[pos].name;
         Node *lhs;
+        VarBlock *locals = malloc(sizeof(VarBlock));
         if (tokens[pos + 2].ty == ')') {
             pos += 3;
             lhs = NULL;
         } else {
             pos += 2;
-            is_in_function = 1;
+            current_locals = locals;
             lhs = argument();
-            is_in_function = 0;
+            locals = current_locals;
+            current_locals = NULL;
             pos++;
             int j = 0;
             // mark ',' with depth from function to determine the register to
@@ -387,12 +395,14 @@ Node *term() {
             }
         }
         if (tokens[pos].ty != '{') {
-            return new_node_func(func_name, lhs, NULL);
+            return new_node_func(func_name, lhs, NULL, locals);
+        } else {
+            current_locals = locals;
+            Node *rhs = paragraph();
+            locals = current_locals;
+            current_locals = NULL;
+            return new_node_func(func_name, lhs, rhs, locals);
         }
-        is_in_function = 1;
-        Node *rhs = paragraph();
-        is_in_function = 0;
-        return new_node_func(func_name, lhs, rhs);
     }
     if (tokens[pos].ty == TK_NUM) {
         return new_node_num(tokens[pos++].val);
@@ -419,13 +429,13 @@ Node *term() {
             pos++;
             if (tokens[pos + 1].ty ==
                 '[') { // array definition; only accepts number immediate
-                Node *node = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
-                                           1); // variable is pointer to int
+                Node *lhs = new_node_lvar(&tokens[pos], tokens[pos + 2].val,
+                                          1); // variable is pointer to int
                 pos += 4;
-                return node;
+                return new_node(ND_DEF, lhs, NULL);
             } else {
-                Node *node = new_node_lvar(&tokens[pos++], 1, 0);
-                return node;
+                Node *lhs = new_node_lvar(&tokens[pos++], 1, 0);
+                return new_node(ND_DEF, lhs, NULL);
             }
         }
         if (tokens[pos + 1].ty == '*') {
@@ -433,7 +443,8 @@ Node *term() {
             while (tokens[++pos].ty == '*') {
                 j++;
             }
-            return new_node_lvar(&tokens[pos++], 1, j);
+            Node *lhs = new_node_lvar(&tokens[pos++], 1, j);
+            return new_node(ND_DEF, lhs, NULL);
         }
         error2("int declaration is followed by something other than function "
                "or variable",
