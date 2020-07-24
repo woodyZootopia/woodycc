@@ -1,0 +1,2 @@
+* Implement global variable
+** make a parser which differently behaves for global definiton of a function/ local call of a function.

@@ -43,7 +43,7 @@ typedef enum {
     ND_WHILE,     // while
     ND_FUNC,      // function
     ND_RETURN,    // return
-    ND_DEF,
+    ND_DEF,       // variable definition
 } NodeKind;
 
 typedef struct Type {

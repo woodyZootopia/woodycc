@@ -6,12 +6,16 @@
 int jump_num = 2;
 
 void gen_lval(Node *node) {
-    /* if (!(node->ty == ND_LOC_VAR || node->ty == ND_GLO_VAR)) { */
-    if (!(node->ty == ND_LOC_VAR)) {
+    if (!(node->ty == ND_LOC_VAR || node->ty == ND_DEF)) {
         error2("left hand side is not a variable", 0);
     }
 
-    int offset = node->var->offset;
+    int offset;
+    if (node->ty == ND_LOC_VAR) {
+        offset = node->var->offset;
+    } else if (node->ty == ND_DEF) {
+        offset = node->lhs->var->offset;
+    }
     printf("    mov rax, rbp\n");
     printf("    sub rax, %d\n", offset);
     printf("    push rax\n"); // now rax is the pointer to the variable
@@ -20,14 +24,14 @@ void gen_lval(Node *node) {
 void gen_arg(Node *node) {
     int depth = 0;
     Node *tmp;
-    if (node->ty == ND_LOC_VAR) {
-        gen_lval(node);
+    if (node->ty == ND_DEF) {
+        gen_lval(node->lhs);
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
         return;
     }
-    for (tmp = node; tmp->ty != ND_LOC_VAR; tmp = tmp->rhs) {
-        gen_lval(tmp->lhs);
+    for (tmp = node; tmp->ty != ND_DEF; tmp = tmp->rhs) {
+        gen_lval(tmp->lhs->lhs);
         printf("    pop rax\n");
         if (depth == 0) {
             printf("    mov [rax], rdi\n");
@@ -49,7 +53,7 @@ void gen_arg(Node *node) {
         }
         depth++;
     }
-    gen_lval(tmp); // tmp is already the last argument
+    gen_lval(tmp->lhs); // tmp is already the last argument
     printf("    pop rax\n");
     if (depth == 1) {
         printf("    mov [rax], rsi\n");
@@ -150,8 +154,10 @@ void gen(Node *node) {
             printf("%s:\n", node->func_name);
             printf("    push rbp\n");
             printf("    mov rbp, rsp\n");
-            printf("    sub rsp, %d\n",
-                   node->var->offset); // allocate `offset` bytes
+            if (node->var) {
+                printf("    sub rsp, %d\n",
+                       node->var->offset); // allocate `offset` bytes
+            }
             if (node->lhs != NULL) {
                 printf("# argument assignment at %d\n", __LINE__);
                 gen_arg(node->lhs);
@@ -284,7 +290,7 @@ void gen(Node *node) {
         printf("    div rdi\n");
         break;
     default:
-        break;
+        error2("operator not known\n", 0);
     }
     printf("    push rax\n");
 }

@@ -180,9 +180,6 @@ Node *new_node_lvar(Token *tok, int declaration_type, int pointer_depth) {
         node->var = gvar;
         node->ty = ND_GLO_VAR;
     } else { // newly declared
-        if (!declaration_type) {
-            error2("The variable is not declared:%s", pos - 1);
-        }
         VarBlock *var;
         if (current_locals) {
             node->ty = ND_LOC_VAR;
@@ -376,15 +373,17 @@ Node *term() {
         char *func_name = tokens[pos].name;
         Node *lhs;
         VarBlock *locals = malloc(sizeof(VarBlock));
+        VarBlock *current_locals_bak = malloc(sizeof(VarBlock));
         if (tokens[pos + 2].ty == ')') {
             pos += 3;
             lhs = NULL;
         } else {
             pos += 2;
+            current_locals_bak = current_locals;
             current_locals = locals;
             lhs = argument();
             locals = current_locals;
-            current_locals = NULL;
+            current_locals = current_locals_bak;
             pos++;
             int j = 0;
             // mark ',' with depth from function to determine the register to
@@ -397,10 +396,11 @@ Node *term() {
         if (tokens[pos].ty != '{') {
             return new_node_func(func_name, lhs, NULL, locals);
         } else {
+            current_locals_bak = current_locals;
             current_locals = locals;
             Node *rhs = paragraph();
             locals = current_locals;
-            current_locals = NULL;
+            current_locals = current_locals_bak;
             return new_node_func(func_name, lhs, rhs, locals);
         }
     }
