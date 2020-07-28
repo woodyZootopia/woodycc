@@ -77,32 +77,46 @@ void gen_arg(Node *node) {
 void gen(Node *node) {
     switch (node->ty) {
     case ND_NUM:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# push immediate at %d\n", __LINE__);
+#endif
         printf("    push %d\n", node->val);
         return;
     case ND_LOC_VAR:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# generate local lhs at %d\n", __LINE__);
+#endif
         gen_lval(node);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
     case ND_GLO_VAR:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# generate global lhs at %d\n", __LINE__);
+#endif
         printf("%s:", node->var->name);
         printf("    .zero %d\n", 4 * node->var->len);
         // TODO: implement this; needs the info of array length
         return;
     case '=':
+#ifdef PRINT_COMMENT_DEBUG
         printf("# assignment at %d\n", __LINE__);
+#endif
         if (node->lhs->ty == ND_DEREF) {
+#ifdef PRINT_COMMENT_DEBUG
             printf("# generate lhs (pointer dereference at %d)\n", __LINE__);
+#endif
             gen(node->lhs->lhs);
         } else if (node->lhs->ty == ND_LOC_VAR) {
+#ifdef PRINT_COMMENT_DEBUG
             printf("# generate lhs at %d\n", __LINE__);
+#endif
             gen_lval(node->lhs);
         } else if (node->lhs->ty == ND_GLO_VAR) {
+#ifdef PRINT_COMMENT_DEBUG
             printf("# generate lhs (global) at %d\n");
+#endif
             printf("    mov %s, rax\n", node->lhs->var->name);
             printf("    push rax\n");
         } else {
@@ -110,7 +124,9 @@ void gen(Node *node) {
         }
         gen(node->rhs);
 
+#ifdef PRINT_COMMENT_DEBUG
         printf("# assign at %d\n", __LINE__);
+#endif
         printf("    pop rdi\n");
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
@@ -118,7 +134,9 @@ void gen(Node *node) {
         return;
     case ND_E:
     case ND_NE:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# equality/nonequality at %d\n", __LINE__);
+#endif
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
@@ -133,7 +151,9 @@ void gen(Node *node) {
         }
         return;
     case ND_WHILE:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# while at %d\n", __LINE__);
+#endif
         printf(".Lbegin:\n");
         gen(node->lhs);
         gen(node->rhs);
@@ -142,14 +162,18 @@ void gen(Node *node) {
         printf(".L%d:\n", jump_num++);
         return;
     case ND_IF:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# if at %d\n", __LINE__);
+#endif
         gen(node->lhs);
         gen(node->rhs);
         printf("    pop rax\n");
         printf(".L%d:\n", jump_num++);
         return;
     case ND_FUNC:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# function at %d\n", __LINE__);
+#endif
         if (node->rhs != NULL) { // function definition
             printf("%s:\n", node->func_name);
             printf("    push rbp\n");
@@ -159,7 +183,9 @@ void gen(Node *node) {
                        node->var->offset); // allocate `offset` bytes
             }
             if (node->lhs != NULL) {
+#ifdef PRINT_COMMENT_DEBUG
                 printf("# argument assignment at %d\n", __LINE__);
+#endif
                 gen_arg(node->lhs);
             }
             gen(node->rhs);
@@ -175,9 +201,13 @@ void gen(Node *node) {
         printf("    push rax\n");
         return;
     case ND_RETURN:
+#ifdef PRINT_COMMENT_DEBUG
         printf("# return at %d\n", __LINE__);
+#endif
         gen(node->lhs);
+#ifdef PRINT_COMMENT_DEBUG
         printf("# return at %d\n", __LINE__);
+#endif
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
@@ -237,20 +267,24 @@ void gen(Node *node) {
         gen_lval(node->lhs);
         return;
     case ND_DEREF: // '*'
+#ifdef PRINT_COMMENT_DEBUG
         printf("# deref at %d\n", __LINE__);
+#endif
         gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
     case ND_DEF:
-        if(node->lhs->ty == ND_GLO_VAR){
+        if (node->lhs->ty == ND_GLO_VAR) {
+#ifdef PRINT_COMMENT_DEBUG
             printf("# generate global lhs at %d\n", __LINE__);
+#endif
             printf("%s:", node->var->name);
             printf("    .zero %d\n", 4 * node->var->len);
             // TODO: implement this; needs the info of array length
             return;
-        } else if (node->lhs->ty == ND_LOC_VAR){
+        } else if (node->lhs->ty == ND_LOC_VAR) {
             return;
         }
     }
